@@ -213,6 +213,7 @@ try {
             License   = $($PrettyName)
             Purchased = $($License.prepaidUnits.enabled)
             Consumed  = $($License.consumedUnits)
+            GUID = $($License.skuid)
         }
     }
     
