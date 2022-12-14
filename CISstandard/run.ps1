@@ -48,14 +48,14 @@ try {
     $Result.ATPEnabled = $SecureScore.enabledServices.Contains("HasEOP")
     $Result.HasAADP1 = $SecureScore.enabledServices.Contains("HasAADP1")
     $Result.HasAADP2 = $SecureScore.enabledServices.Contains("HasAADP2")
-    $Result.AdminMFAV2 = [int]($SecureScore.controlScores | where {$_.controlName -eq "AdminMFAv2"} | Select-Object -ExpandProperty count)
-    $Result.MFARegistrationV2 = [int]($SecureScore.controlScores | where {$_.controlName -eq "MFARegistrationV2"} | Select-Object -ExpandProperty count)
-    $Result.GlobalAdminCount = [int]($SecureScore.controlScores | where {$_.controlName -eq "OneAdmin"} | Select-Object -ExpandProperty count)
-    $Result.BlockLegacyAuthentication = [int]($SecureScore.controlScores | where {$_.controlName -eq "BlockLegacyAuthentication"} | Select-Object -ExpandProperty count)
-    $Result.PasswordHashSync = $SecureScore.controlScores | where {$_.controlName -eq "PasswordHashSync"} | Select-Object -ExpandProperty on
-    $Result.SigninRiskPolicy = [int]($SecureScore.controlScores | where {$_.controlName -eq "SigninRiskPolicy"} | Select-Object -ExpandProperty count)
-    $Result.UserRiskPolicy = [int]($SecureScore.controlScores | where {$_.controlName -eq "UserRiskPolicy"} | Select-Object -ExpandProperty count)
-    $Result.PWAgePolicyNew = [int]($SecureScore.controlScores | where {$_.controlName -eq "PWAgePolicyNew"} | Select-Object -ExpandProperty expiry)
+    $Result.AdminMFAV2 = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "AdminMFAv2"} | Select-Object -ExpandProperty count)
+    $Result.MFARegistrationV2 = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "MFARegistrationV2"} | Select-Object -ExpandProperty count)
+    $Result.GlobalAdminCount = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "OneAdmin"} | Select-Object -ExpandProperty count)
+    $Result.BlockLegacyAuthentication = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "BlockLegacyAuthentication"} | Select-Object -ExpandProperty count)
+    $Result.PasswordHashSync = $SecureScore.controlScores | where-object {$_.controlName -eq "PasswordHashSync"} | Select-Object -ExpandProperty on
+    $Result.SigninRiskPolicy = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "SigninRiskPolicy"} | Select-Object -ExpandProperty count)
+    $Result.UserRiskPolicy = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "UserRiskPolicy"} | Select-Object -ExpandProperty count)
+    $Result.PWAgePolicyNew = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "PWAgePolicyNew"} | Select-Object -ExpandProperty expiry)
 
 }
 catch {
@@ -78,7 +78,7 @@ catch {
     # Check On Premise Password Protection
 try {
     $OPPPGraph = New-ClassicAPIGetRequest -Resource "74658136-14ec-4630-ad9b-26e160ff0fc6" -TenantID $TenantFilter -uri "https://main.iam.ad.ext.azure.com/api/AuthenticationMethods/PasswordPolicy" -Method "GET"
-    $Result.enableBannedPassworCheckOnPremise = $OPPPGraph.enableBannedPassworCheckOnPremise
+    $Result.enableBannedPassworCheckOnPremise = $OPPPGraph.enableBannedPassworCheckOnPremises
 }
 catch {
     Write-LogMessage -API 'CISstandardsAnalyser' -tenant $Tenantfilter -message "On Premise Password Protection on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
@@ -107,7 +107,7 @@ catch {
 # Admin Users Session CA Policy
 try {
     $CAPolicies = New-GraphGetRequest -Uri 'https://graph.microsoft.com/beta/identity/conditionalAccess/policies' -tenantid $Tenantfilter
-    $Result.AdminSessionbyCA = ($CAPolicies | where {$_.conditions.users.includeRoles -ne $null -and $_.conditions.applications.includeApplications -eq "All" -and $_.sessionControls.persistentBrowser.mode -eq "never" -and $_.sessionControls.persistentBrowser.IsEnabled -eq "True"} | Select-object -ExpandProperty Displayname | measure-object).count
+    $Result.AdminSessionbyCA = ($CAPolicies | where-object {$_.conditions.users.includeRoles -ne $null -and $_.conditions.applications.includeApplications -eq "All" -and $_.sessionControls.persistentBrowser.mode -eq "never" -and $_.sessionControls.persistentBrowser.IsEnabled -eq "True"} | Select-object -ExpandProperty Displayname | measure-object).count
 }
 catch {
     Write-LogMessage -API 'CISstandardsAnalyser' -tenant $Tenantfilter -message "MFA Enforced by CA on $($Tenantfilter) Error: $($_.exception.message)" -sev 'Error'
