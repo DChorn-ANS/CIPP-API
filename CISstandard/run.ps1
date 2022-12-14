@@ -90,7 +90,7 @@ try {
     $Result.enableBannedPassworCheckOnPremise = $OPPPGraph.enableBannedPassworCheckOnPremise
 }
 catch {
-    Write-LogMessage -API 'CISstandardsAnalyser' -tenant $tenant -message "Self Service Password Reset on $($tenant). Error: $($_.exception.message)" -sev 'Error' 
+    Write-LogMessage -API 'CISstandardsAnalyser' -tenant $tenant -message "On Premise Password Protection on $($tenant). Error: $($_.exception.message)" -sev 'Error' 
 }
 
 # Check JIT Access Packages
@@ -110,7 +110,7 @@ try {
     $Result.SecureDefaultState = $SecureDefaultsState.IsEnabled
 }
 catch {
-    Write-LogMessage -API 'BestPracticeAnalyser' -tenant $tenant -message "Security Defaults State on $($tenant) Error: $($_.exception.message)" -sev 'Error'
+    Write-LogMessage -API 'CISstandardsAnalyser' -tenant $tenant -message "Security Defaults State on $($tenant) Error: $($_.exception.message)" -sev 'Error'
 }
 
 # Admin Users Session CA Policy
