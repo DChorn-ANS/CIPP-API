@@ -53,9 +53,14 @@ try {
     $Result.GlobalAdminCount = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "OneAdmin"} | Select-Object -ExpandProperty count)
     $Result.BlockLegacyAuthentication = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "BlockLegacyAuthentication"} | Select-Object -ExpandProperty count)
     $Result.PasswordHashSync = $SecureScore.controlScores | where-object {$_.controlName -eq "PasswordHashSync"} | Select-Object -ExpandProperty on
+    $Result.PWAgePolicyNew = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "PWAgePolicyNew"} | Select-Object -ExpandProperty expiry)
+    
+    #Azure AD Premium P2 required
+    if ($null -ne $result.HasAADP2){
     $Result.SigninRiskPolicy = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "SigninRiskPolicy"} | Select-Object -ExpandProperty count)
     $Result.UserRiskPolicy = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "UserRiskPolicy"} | Select-Object -ExpandProperty count)
-    $Result.PWAgePolicyNew = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "PWAgePolicyNew"} | Select-Object -ExpandProperty expiry)
+    }
+
 
 }
 catch {
@@ -77,8 +82,10 @@ catch {
 
     # Check On Premise Password Protection
 try {
+    if($null -ne $Result.HasAADP1){
     $OPPPGraph = New-ClassicAPIGetRequest -Resource "74658136-14ec-4630-ad9b-26e160ff0fc6" -TenantID $TenantFilter -uri "https://main.iam.ad.ext.azure.com/api/AuthenticationMethods/PasswordPolicy" -Method "GET"
     $Result.enableBannedPassworCheckOnPremise = $OPPPGraph.enableBannedPasswordCheckOnPremises
+    }
 }
 catch {
     Write-LogMessage -API 'CISstandardsAnalyser' -tenant $Tenantfilter -message "On Premise Password Protection on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
@@ -86,10 +93,11 @@ catch {
 
 # Check JIT Access Packages
 try {
-    
+    if ($null -ne $Result.HasAADP2){
     $JIT = New-GraphGetRequest -Uri 'https://graph.microsoft.com/beta/identityGovernance/entitlementManagement/accessPackages' -tenantid $Tenantfilter
     $JITCount = $JIT | measure-object -Property id | select-object -ExpandProperty count
     $Result.accessPackages = if(!$JitCount){[int]"0"}else{$JitCount}
+    }
 }
 catch {
     Write-LogMessage -API 'CISstandardsAnalyser' -tenant $Tenantfilter -message "JIT Access Packages on $($Tenantfilter) Error: $($_.exception.message)" -sev 'Error'
@@ -106,8 +114,10 @@ catch {
 
 # Admin Users Session CA Policy
 try {
+    if ($null -ne $result.HasAADP1){
     $CAPolicies = New-GraphGetRequest -Uri 'https://graph.microsoft.com/beta/identity/conditionalAccess/policies' -tenantid $Tenantfilter
     $Result.AdminSessionbyCA = ($CAPolicies | where-object {$_.conditions.users.includeRoles -ne $null -and $_.conditions.applications.includeApplications -eq "All" -and $_.sessionControls.persistentBrowser.mode -eq "never" -and $_.sessionControls.persistentBrowser.IsEnabled -eq "True"} | Select-object -ExpandProperty Displayname | measure-object).count
+    }
 }
 catch {
     Write-LogMessage -API 'CISstandardsAnalyser' -tenant $Tenantfilter -message "MFA Enforced by CA on $($Tenantfilter) Error: $($_.exception.message)" -sev 'Error'
