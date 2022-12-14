@@ -68,14 +68,15 @@ catch {
 }
 
 # Get Self Service Password Reset State
-try {    
-    $SSPRGraph = Invoke-RestMethod -ContentType 'application/json;charset=UTF-8' -Uri 'https://main.iam.ad.ext.azure.com/api/PasswordReset/PasswordResetPolicies' -Method GET -Headers @{
-        Authorization            = "Bearer $($tokensspr.access_token)";
-        'x-ms-client-request-id' = [guid]::NewGuid().ToString();
-        'x-ms-client-session-id' = [guid]::NewGuid().ToString()
-        'x-ms-correlation-id'    = [guid]::NewGuid()
-        'X-Requested-With'       = 'XMLHttpRequest' 
-    }
+try {
+    $SSPRGraph = New-ClassicAPIGetRequest -Resource "74658136-14ec-4630-ad9b-26e160ff0fc6" -TenantID $TenantFilter -uri "https://main.iam.ad.ext.azure.com/api/PasswordReset/PasswordResetPolicies" -Method "GET"    
+    #$SSPRGraph = Invoke-RestMethod -ContentType 'application/json;charset=UTF-8' -Uri 'https://main.iam.ad.ext.azure.com/api/PasswordReset/PasswordResetPolicies' -Method GET -Headers @{
+        #Authorization            = "Bearer $($tokensspr.access_token)";
+        #'x-ms-client-request-id' = [guid]::NewGuid().ToString();
+        #'x-ms-client-session-id' = [guid]::NewGuid().ToString()
+        #'x-ms-correlation-id'    = [guid]::NewGuid()
+        #'X-Requested-With'       = 'XMLHttpRequest' 
+    #}
     If ($SSPRGraph.enablementType -eq 0) { $Result.SelfServicePasswordReset = 'Off' }
     If ($SSPRGraph.enablementType -eq 1) { $Result.SelfServicePasswordReset = 'Specific Users' }
     If ($SSPRGraph.enablementType -eq 2) { $Result.SelfServicePasswordReset = 'On' }
