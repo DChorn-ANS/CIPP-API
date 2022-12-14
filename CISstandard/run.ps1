@@ -78,7 +78,7 @@ catch {
     # Check On Premise Password Protection
 try {
     $OPPPGraph = New-ClassicAPIGetRequest -Resource "74658136-14ec-4630-ad9b-26e160ff0fc6" -TenantID $TenantFilter -uri "https://main.iam.ad.ext.azure.com/api/AuthenticationMethods/PasswordPolicy" -Method "GET"
-    $Result.enableBannedPassworCheckOnPremise = $OPPPGraph.enableBannedPassworCheckOnPremises
+    $Result.enableBannedPassworCheckOnPremise = $OPPPGraph.enableBannedPasswordCheckOnPremises
 }
 catch {
     Write-LogMessage -API 'CISstandardsAnalyser' -tenant $Tenantfilter -message "On Premise Password Protection on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
