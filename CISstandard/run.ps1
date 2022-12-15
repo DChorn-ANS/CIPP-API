@@ -28,6 +28,7 @@ $Result = @{
     AdminMFAV2                       = ''
     MFARegistrationV2                = ''
     GlobalAdminCount                 = ''
+    GlobalAdminList = ''
     BlockLegacyAuthentication        = ''
     PasswordHashSync                 = ''
     SigninRiskPolicy                 = ''
@@ -65,6 +66,17 @@ try {
 }
 catch {
     Write-LogMessage -API 'CISstandardsAnalyser' -tenant $Tenantfilter -message "Secure Score Retrieval on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
+}
+
+#Populate Global Admin Fields
+try {
+    $GlobalAdminGraph = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/directoryRoles/roleTemplateId=62e90394-69f5-4237-9190-012177145e10/members" -tenantid $Tenantfilter
+    $AdminList = ($GlobalAdminGraph | Where-object {($_.accountEnabled -eq "True") -and ($Null -ne $_.userPrincipalName)}| Select-Object -ExpandProperty userPrincipalName) -join '<br />'
+    $ServicePrincipalList = ($GlobalAdminGraph | Where-object {($_.accountEnabled -eq "True") -and ($Null -ne $_.appDisplayName)}| Select-Object -ExpandProperty appDisplayName) -join '<br />'
+    $Result.GlobalAdminList = $AdminList + '<br />' + $ServicePrincipalList
+}
+catch {
+    Write-LogMessage -API 'CISstandardsAnalyser' -tenant $Tenantfilter -message "Global Admin List on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
 }
 
 # Get Self Service Password Reset State
