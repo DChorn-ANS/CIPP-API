@@ -129,7 +129,7 @@ catch {
 try {
     if ($null -ne $result.HasAADP1) {
         $CAPolicies = New-GraphGetRequest -Uri 'https://graph.microsoft.com/beta/identity/conditionalAccess/policies' -tenantid $Tenantfilter
-        $Result.AdminSessionbyCAName = $CAPolicies | where-object { $_.conditions.users.includeRoles -ne $null -and $_.conditions.applications.includeApplications -eq "All" -and $_.sessionControls.persistentBrowser.mode -eq "never" -and $_.sessionControls.persistentBrowser.IsEnabled -eq "True" } | Select-object -ExpandProperty Displayname
+        $Result.AdminSessionbyCAName = ($CAPolicies | where-object { $_.conditions.users.includeRoles -ne $null -and $_.conditions.applications.includeApplications -eq "All" -and $_.sessionControls.persistentBrowser.mode -eq "never" -and $_.sessionControls.persistentBrowser.IsEnabled -eq "True" } | Select-object -ExpandProperty Displayname) -join '<br />'
         $Result.AdminSessionbyCA = ($Result.AdminSessionbyCAName | Measure-object).count
     }
 }
