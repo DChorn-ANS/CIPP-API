@@ -42,25 +42,34 @@ $Result = @{
     AdminSessionbyCAName              = ''
 }
 
-# Starting the ANS Best Practice Analyser
+# Starting the CIS Framework Analyser
     
 # Get the All results needed from the Secure Score
 try {
     $SecureScore = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/security/secureScores?`$top=1" -tenantid $Tenantfilter -noPagination $true
-    $Result.ATPEnabled = $SecureScore.enabledServices.Contains("HasEOP")
+    $Result.ATPEnabled = $SecureScore.enabledServices.Contains("HasEXOP2")
     $Result.HasAADP1 = $SecureScore.enabledServices.Contains("HasAADP1")
     $Result.HasAADP2 = $SecureScore.enabledServices.Contains("HasAADP2")
     $Result.AdminMFAV2 = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "AdminMFAv2" } | Select-Object -ExpandProperty count)
     $Result.MFARegistrationV2 = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "MFARegistrationV2" } | Select-Object -ExpandProperty count)
     $Result.GlobalAdminCount = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "OneAdmin" } | Select-Object -ExpandProperty count)
-    $Result.BlockLegacyAuthentication = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "BlockLegacyAuthentication" } | Select-Object -ExpandProperty count)
     $Result.PasswordHashSync = $SecureScore.controlScores | where-object { $_.controlName -eq "PasswordHashSync" } | Select-Object -ExpandProperty on
     $Result.PWAgePolicyNew = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "PWAgePolicyNew" } | Select-Object -ExpandProperty expiry)
-    
+
+    #Azure AD Premium P1 required
+    if ($result.HasAADP1 -eq $True) {
+        $Result.BlockLegacyAuthentication = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "BlockLegacyAuthentication" } | Select-Object -ExpandProperty count)
+    }else{
+        $Result.BlockLegacyAuthentication = "Not Licensed for AADp1"
+    }
+
     #Azure AD Premium P2 required
-    if ($null -ne $result.HasAADP2) {
+    if ($result.HasAADP2 -eq $True) {
         $Result.SigninRiskPolicy = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "SigninRiskPolicy" } | Select-Object -ExpandProperty count)
         $Result.UserRiskPolicy = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "UserRiskPolicy" } | Select-Object -ExpandProperty count)
+    }else{
+        $Result.SigninRiskPolicy = "Not Licensed for AADp2"
+        $Result.UserRiskPolicy = "Not Licensed for AADp2"
     }
 
 
@@ -95,9 +104,11 @@ catch {
 
 # Check On Premise Password Protection
 try {
-    if ($null -ne $Result.HasAADP1) {
+    if ($result.HasAADP1 -eq $True) {
         $OPPPGraph = New-ClassicAPIGetRequest -Resource "74658136-14ec-4630-ad9b-26e160ff0fc6" -TenantID $TenantFilter -uri "https://main.iam.ad.ext.azure.com/api/AuthenticationMethods/PasswordPolicy" -Method "GET"
         $Result.enableBannedPassworCheckOnPremise = $OPPPGraph.enableBannedPasswordCheckOnPremises
+    }else{
+        $result.enableBannedPassworCheckOnPremise = "Not Licensed for AADp1"
     }
 }
 catch {
@@ -110,6 +121,8 @@ try {
         $JIT = New-GraphGetRequest -Uri 'https://graph.microsoft.com/beta/identityGovernance/entitlementManagement/accessPackages' -tenantid $Tenantfilter
         $JITCount = $JIT | measure-object -Property id | select-object -ExpandProperty count
         $Result.accessPackages = if (!$JitCount) { [int]"0" }else { $JitCount }
+    }else{
+        $Result.accessPackages = "Not Licensed for AADp2"
     }
 }
 catch {
