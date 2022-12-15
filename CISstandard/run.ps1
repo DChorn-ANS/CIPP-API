@@ -13,32 +13,33 @@ Write-Host 'PowerShell HTTP trigger function processed a request.'
 $TenantFilter = $Request.Query.TenantFilter
 if ($TenantFilter -eq 'AllTenants') {
     Push-OutputBinding -Name Msg -Value (Get-Date).ToString()
-        [PSCustomObject]@{
-            Tenant   = 'Report does not support all tenants'
-            Licenses = 'Report does not support all tenants'
-        }
+    [PSCustomObject]@{
+        Tenant   = 'Report does not support all tenants'
+        Licenses = 'Report does not support all tenants'
+    }
 }
 
 #Build Result Table
 $Result = @{
-    Tenant                           = "$TenantFilter"
-    ATPEnabled                       = ''
-    HasAADP1                         = ''
-    HasAADP2                         = ''
-    AdminMFAV2                       = ''
-    MFARegistrationV2                = ''
-    GlobalAdminCount                 = ''
-    GlobalAdminList = ''
-    BlockLegacyAuthentication        = ''
-    PasswordHashSync                 = ''
-    SigninRiskPolicy                 = ''
-    UserRiskPolicy                   = ''
-    PWAgePolicyNew                   = ''
-    SelfServicePasswordReset                   = ''
-    enableBannedPassworCheckOnPremise                   = ''
-    accessPackages                   = ''
-    SecureDefaultState                   = ''
-    AdminSessionbyCA                   = ''
+    Tenant                            = "$TenantFilter"
+    ATPEnabled                        = ''
+    HasAADP1                          = ''
+    HasAADP2                          = ''
+    AdminMFAV2                        = ''
+    MFARegistrationV2                 = ''
+    GlobalAdminCount                  = ''
+    GlobalAdminList                   = ''
+    BlockLegacyAuthentication         = ''
+    PasswordHashSync                  = ''
+    SigninRiskPolicy                  = ''
+    UserRiskPolicy                    = ''
+    PWAgePolicyNew                    = ''
+    SelfServicePasswordReset          = ''
+    enableBannedPassworCheckOnPremise = ''
+    accessPackages                    = ''
+    SecureDefaultState                = ''
+    AdminSessionbyCA                  = ''
+    AdminSessionbyCAName              = ''
 }
 
 # Starting the ANS Best Practice Analyser
@@ -49,17 +50,17 @@ try {
     $Result.ATPEnabled = $SecureScore.enabledServices.Contains("HasEOP")
     $Result.HasAADP1 = $SecureScore.enabledServices.Contains("HasAADP1")
     $Result.HasAADP2 = $SecureScore.enabledServices.Contains("HasAADP2")
-    $Result.AdminMFAV2 = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "AdminMFAv2"} | Select-Object -ExpandProperty count)
-    $Result.MFARegistrationV2 = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "MFARegistrationV2"} | Select-Object -ExpandProperty count)
-    $Result.GlobalAdminCount = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "OneAdmin"} | Select-Object -ExpandProperty count)
-    $Result.BlockLegacyAuthentication = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "BlockLegacyAuthentication"} | Select-Object -ExpandProperty count)
-    $Result.PasswordHashSync = $SecureScore.controlScores | where-object {$_.controlName -eq "PasswordHashSync"} | Select-Object -ExpandProperty on
-    $Result.PWAgePolicyNew = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "PWAgePolicyNew"} | Select-Object -ExpandProperty expiry)
+    $Result.AdminMFAV2 = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "AdminMFAv2" } | Select-Object -ExpandProperty count)
+    $Result.MFARegistrationV2 = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "MFARegistrationV2" } | Select-Object -ExpandProperty count)
+    $Result.GlobalAdminCount = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "OneAdmin" } | Select-Object -ExpandProperty count)
+    $Result.BlockLegacyAuthentication = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "BlockLegacyAuthentication" } | Select-Object -ExpandProperty count)
+    $Result.PasswordHashSync = $SecureScore.controlScores | where-object { $_.controlName -eq "PasswordHashSync" } | Select-Object -ExpandProperty on
+    $Result.PWAgePolicyNew = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "PWAgePolicyNew" } | Select-Object -ExpandProperty expiry)
     
     #Azure AD Premium P2 required
-    if ($null -ne $result.HasAADP2){
-    $Result.SigninRiskPolicy = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "SigninRiskPolicy"} | Select-Object -ExpandProperty count)
-    $Result.UserRiskPolicy = [int]($SecureScore.controlScores | where-object {$_.controlName -eq "UserRiskPolicy"} | Select-Object -ExpandProperty count)
+    if ($null -ne $result.HasAADP2) {
+        $Result.SigninRiskPolicy = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "SigninRiskPolicy" } | Select-Object -ExpandProperty count)
+        $Result.UserRiskPolicy = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "UserRiskPolicy" } | Select-Object -ExpandProperty count)
     }
 
 
@@ -68,11 +69,11 @@ catch {
     Write-LogMessage -API 'CISstandardsAnalyser' -tenant $Tenantfilter -message "Secure Score Retrieval on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
 }
 
-#Populate Global Admin Fields
+#Populate Global Admin List
 try {
     $GlobalAdminGraph = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/directoryRoles/roleTemplateId=62e90394-69f5-4237-9190-012177145e10/members" -tenantid $Tenantfilter
-    $AdminList = ($GlobalAdminGraph | Where-object {($_.accountEnabled -eq "True") -and ($Null -ne $_.userPrincipalName)}| Select-Object -ExpandProperty userPrincipalName) -join '<br />'
-    $ServicePrincipalList = ($GlobalAdminGraph | Where-object {($_.accountEnabled -eq "True") -and ($Null -ne $_.appDisplayName)}| Select-Object -ExpandProperty appDisplayName) -join '<br />'
+    $AdminList = ($GlobalAdminGraph | Where-object { ($_.accountEnabled -eq "True") -and ($Null -ne $_.userPrincipalName) } | Select-Object -ExpandProperty userPrincipalName) -join '<br />'
+    $ServicePrincipalList = ($GlobalAdminGraph | Where-object { ($_.accountEnabled -eq "True") -and ($Null -ne $_.appDisplayName) } | Select-Object -ExpandProperty appDisplayName) -join '<br />'
     $Result.GlobalAdminList = $AdminList + '<br />' + $ServicePrincipalList
 }
 catch {
@@ -92,11 +93,11 @@ catch {
 }
 
 
-    # Check On Premise Password Protection
+# Check On Premise Password Protection
 try {
-    if($null -ne $Result.HasAADP1){
-    $OPPPGraph = New-ClassicAPIGetRequest -Resource "74658136-14ec-4630-ad9b-26e160ff0fc6" -TenantID $TenantFilter -uri "https://main.iam.ad.ext.azure.com/api/AuthenticationMethods/PasswordPolicy" -Method "GET"
-    $Result.enableBannedPassworCheckOnPremise = $OPPPGraph.enableBannedPasswordCheckOnPremises
+    if ($null -ne $Result.HasAADP1) {
+        $OPPPGraph = New-ClassicAPIGetRequest -Resource "74658136-14ec-4630-ad9b-26e160ff0fc6" -TenantID $TenantFilter -uri "https://main.iam.ad.ext.azure.com/api/AuthenticationMethods/PasswordPolicy" -Method "GET"
+        $Result.enableBannedPassworCheckOnPremise = $OPPPGraph.enableBannedPasswordCheckOnPremises
     }
 }
 catch {
@@ -105,10 +106,10 @@ catch {
 
 # Check JIT Access Packages
 try {
-    if ($null -ne $Result.HasAADP2){
-    $JIT = New-GraphGetRequest -Uri 'https://graph.microsoft.com/beta/identityGovernance/entitlementManagement/accessPackages' -tenantid $Tenantfilter
-    $JITCount = $JIT | measure-object -Property id | select-object -ExpandProperty count
-    $Result.accessPackages = if(!$JitCount){[int]"0"}else{$JitCount}
+    if ($null -ne $Result.HasAADP2) {
+        $JIT = New-GraphGetRequest -Uri 'https://graph.microsoft.com/beta/identityGovernance/entitlementManagement/accessPackages' -tenantid $Tenantfilter
+        $JITCount = $JIT | measure-object -Property id | select-object -ExpandProperty count
+        $Result.accessPackages = if (!$JitCount) { [int]"0" }else { $JitCount }
     }
 }
 catch {
@@ -126,9 +127,10 @@ catch {
 
 # Admin Users Session CA Policy
 try {
-    if ($null -ne $result.HasAADP1){
-    $CAPolicies = New-GraphGetRequest -Uri 'https://graph.microsoft.com/beta/identity/conditionalAccess/policies' -tenantid $Tenantfilter
-    $Result.AdminSessionbyCA = ($CAPolicies | where-object {$_.conditions.users.includeRoles -ne $null -and $_.conditions.applications.includeApplications -eq "All" -and $_.sessionControls.persistentBrowser.mode -eq "never" -and $_.sessionControls.persistentBrowser.IsEnabled -eq "True"} | Select-object -ExpandProperty Displayname | measure-object).count
+    if ($null -ne $result.HasAADP1) {
+        $CAPolicies = New-GraphGetRequest -Uri 'https://graph.microsoft.com/beta/identity/conditionalAccess/policies' -tenantid $Tenantfilter
+        $Result.AdminSessionbyCAName = $CAPolicies | where-object { $_.conditions.users.includeRoles -ne $null -and $_.conditions.applications.includeApplications -eq "All" -and $_.sessionControls.persistentBrowser.mode -eq "never" -and $_.sessionControls.persistentBrowser.IsEnabled -eq "True" } | Select-object -ExpandProperty Displayname
+        $Result.AdminSessionbyCA = ($Result.AdminSessionbyCAName | Measure-object).count
     }
 }
 catch {
