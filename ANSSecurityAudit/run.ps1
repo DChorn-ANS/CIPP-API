@@ -111,14 +111,14 @@ catch {
 
 #Populate Privileged User List
 try {
-    $PrivilegedUsersGraph = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments" -tenantid $Tenantfilter
-    $AllUsersAccountState = New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/users?select=userPrincipalName,id' -tenantid $Tenant
-    #Import Privileged Roles Table
-    Set-Location (Get-Item $PSScriptRoot).Parent.FullName
-    $PrivilegedRoleTable = Import-Csv PrivilegedRoleTable.csv | Sort-Object -Property 'GUID' -Unique
-    $PrivilegedUsersList = foreach ($Roleassignment in $PrivilegedUsersGraph) {
+    $roleAssignmentsGraph = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments" -tenantid $Tenantfilter
+    $roleDefinitionsGraph = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions" -tenantid $Tenantfilter
+    $AllUsersAccountState = New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/users?select=userPrincipalName,id' -tenantid $Tenantfilter
 
-        $PrivilegedRolePrettyName = ($PrivilegedRoleTable | Where-Object { $_.guid -eq $Roleassignment.roleDefinitionId }).'Role_Display_Name' | Select-Object -Last 1
+
+    $PrivilegedUsersList = foreach ($Roleassignment in $roleAssignmentsGraph) {
+
+        $PrivilegedRolePrettyName = ($roleDefinitionsGraph | Where-Object { $_.id -eq $Roleassignment.roleDefinitionId }).displayName | Select-Object -Last 1
         $PrivilegedUserName = ($AllUsersAccountState | Where-Object { ( $_.id -eq $Roleassignment.principalId) -and ($_.accountenabled -eq 'True') } | Select-Object -First 1).userPrincipalName
         if ($PrivilegedRolePrettyName) {
             if ($PrivilegedUserName) {
