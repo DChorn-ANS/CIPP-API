@@ -46,7 +46,7 @@ $Result = @{
     Usermfabyca                       = ''
     UserMFAbyCAname                   = ''
     PriviligedUsersCount = ''
-    PriviligedUsersList = ''
+    PrivilegedUsersJSON = ''
 }
 
 # Starting the CIS Framework Analyser
@@ -113,15 +113,10 @@ catch {
 try {
     $PrivilegedUsersGraph = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments" -tenantid $Tenantfilter
     $AllUsersAccountState = New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/users?select=userPrincipalName,id' -tenantid $Tenant
-    $PrivilegedUsersList = foreach ($Roleassignment in $PrivilegedUsersGraph) {
-        # Match the User
-        $User = $AllUsersAccountState | Where-Object { $_.id -eq $Roleassignment.principalId } | Select-Object -First 1
-        $User.userPrincipalName
-    }
     #Import Privileged Roles Table
     Set-Location (Get-Item $PSScriptRoot).Parent.FullName
-    $PrivilegedRoleTable = Import-Csv PrivilegedRoleTable.csv | Sort-Object -Property 'guid' -Unique
-    $Result.PrivilegedUsersList = foreach ($Roleassignment in $PrivilegedUsersGraph) {
+    $PrivilegedRoleTable = Import-Csv PrivilegedRoleTable.csv | Sort-Object -Property 'GUID' -Unique
+    $PrivilegedUsersList = foreach ($Roleassignment in $PrivilegedUsersGraph) {
 
         $PrivilegedRolePrettyName = ($PrivilegedRoleTable | Where-Object { $_.guid -eq $Roleassignment.roleDefinitionId }).'Role_Display_Name' | Select-Object -Last 1
         $PrivilegedUserName = ($AllUsersAccountState | Where-Object { ( $_.id -eq $Roleassignment.principalId) -and ($_.accountenabled -eq 'True') } | Select-Object -First 1).userPrincipalName
@@ -134,8 +129,8 @@ try {
             }
         }
     }
-    $Result.PriviligedUsersCount = ($Result.PrivilegedUsersList.User | Measure-object).count
-    $Result.PrivilegedUsersList = ConvertTo-Json -InputObject @($Result.PrivilegedUsersList) -Compress
+    $Result.PriviligedUsersCount = ($PrivilegedUsersList.User | Measure-object).count
+    $Result.PrivilegedUsersJSON = ConvertTo-Json -InputObject @($PrivilegedUsersList) -Compress
 }
 catch {
     Write-LogMessage -API 'ANSSecurityAudit' -tenant $Tenantfilter -message "Global Admin List on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
