@@ -137,7 +137,7 @@ catch {
 # Check Sharepoint Sharing Settings
 try {
     
-    $Sharepoint = New-GraphGetRequest -Uri 'https://graph.microsoft.com/beta/admin/sharepoint/settings' -tenantid $tenantfilter
+    $Sharepoint = New-GraphGetRequest -Uri 'https://graph.microsoft.com/beta/admin/sharepoint/settings' -tenantid $tenantfilter -AsApp $true
     $Result.SPSharing = $Sharepoint.sharingCapability
 }
 catch {
