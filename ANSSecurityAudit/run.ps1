@@ -25,8 +25,8 @@ $Result = @{
     ATPEnabled                        = ''
     HasAADP1                          = ''
     HasAADP2                          = ''
-    HasDLP = ''
-    DLP = ''
+    HasDLP                            = ''
+    DLP                               = ''
     AdminMFAV2                        = ''
     MFARegistrationV2                 = ''
     GlobalAdminCount                  = ''
@@ -36,15 +36,15 @@ $Result = @{
     SigninRiskPolicy                  = ''
     UserRiskPolicy                    = ''
     PWAgePolicyNew                    = ''
-    CustomerLockbox = ''
+    CustomerLockbox                   = ''
     SelfServicePasswordReset          = ''
     enableBannedPassworCheckOnPremise = ''
     accessPackages                    = ''
     SecureDefaultState                = ''
-    SPSharing = ''
-    Backupify = ''
-    Usermfabyca = ''
-    UserMFAbyCAname = ''
+    SPSharing                         = ''
+    Backupify                         = ''
+    Usermfabyca                       = ''
+    UserMFAbyCAname                   = ''
     AdminSessionbyCA                  = ''
     AdminSessionbyCAName              = ''
 }
@@ -161,7 +161,8 @@ try {
         $JIT = New-GraphGetRequest -Uri 'https://graph.microsoft.com/beta/identityGovernance/entitlementManagement/accessPackages' -tenantid $Tenantfilter
         $JITCount = $JIT | measure-object -Property id | select-object -ExpandProperty count
         $Result.accessPackages = if (!$JitCount) { [int]"0" }else { $JitCount }
-    }else{
+    }
+    else {
         $Result.accessPackages = "Not Licensed for AADp2"
     }
 }
@@ -182,10 +183,11 @@ catch {
 try {
     if ($result.HasAADP1 -eq $True) {
         $CAPolicies = New-GraphGetRequest -Uri 'https://graph.microsoft.com/beta/identity/conditionalAccess/policies' -tenantid $Tenantfilter
-        $Result.UserMFAbyCAname = ($CAPolicies | where-object { $_.state -eq "enabled" -and $_.conditions.applications.includeApplications -eq "All" -and $_.conditions.users.includeUsers -eq "All" -and $_.grantControls.builtincontrols -eq "mfa" -and $_.conditions.userRiskLevels.length -lt 1 -and $_.conditions.signInRiskLevels.length -lt 1} | Select-object -ExpandProperty Displayname) -join '<br />'
+        $Result.UserMFAbyCAname = ($CAPolicies | where-object { $_.state -eq "enabled" -and $_.conditions.applications.includeApplications -eq "All" -and $_.conditions.users.includeUsers -eq "All" -and $_.grantControls.builtincontrols -eq "mfa" -and $_.conditions.userRiskLevels.length -lt 1 -and $_.conditions.signInRiskLevels.length -lt 1 } | Select-object -ExpandProperty Displayname) -join '<br />'
         $Result.UserMFAbyCA = ($Result.Usermfabyca | measure-object).Count
-    }else {
-    $Result.UserMFAbyCA = "Not Licensed for AADp1"
+    }
+    else {
+        $Result.UserMFAbyCA = "Not Licensed for AADp1"
     }
 }
 catch {
