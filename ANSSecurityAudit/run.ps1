@@ -139,7 +139,7 @@ catch {
 # Check Sharepoint Sharing Settings
 try {
     
-    $Sharepoint = New-GraphGetRequest -Uri 'https://graph.microsoft.com/beta/admin/sharepoint/settings' -tenantid $tenant
+    $Sharepoint = New-GraphGetRequest -Uri 'https://graph.microsoft.com/beta/admin/sharepoint/settings' -tenantid $tenantfilter
     $Result.SPSharing = $Sharepoint.sharingCapability
 }
 catch {
@@ -172,7 +172,7 @@ catch {
 
 # Check if Backupify is Deployed
 try {
-    $Result.Backupify = New-GraphGetRequest -Uri 'https://graph.microsoft.com/v1.0/servicePrincipals/fdaecf07-735e-46f0-aad0-6c2835d241b0' -tenantid $tenant | Select-Object -ExpandProperty accountEnabled
+    $Result.Backupify = New-GraphGetRequest -Uri 'https://graph.microsoft.com/v1.0/servicePrincipals/fdaecf07-735e-46f0-aad0-6c2835d241b0' -tenantid $tenantfilter | Select-Object -ExpandProperty accountEnabled
 }
 catch {
     Write-LogMessage -API 'ANSBestPracticeAnalyser' -tenant $tenant -message "Backupify on $($tenant) Error: $($_.exception.message)" -sev 'Error'
