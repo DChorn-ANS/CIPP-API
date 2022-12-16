@@ -182,7 +182,7 @@ try {
     if ($result.HasAADP1 -eq $True) {
         $CAPolicies = New-GraphGetRequest -Uri 'https://graph.microsoft.com/beta/identity/conditionalAccess/policies' -tenantid $Tenantfilter
         $Result.UserMFAbyCAname = ($CAPolicies | where-object { $_.state -eq "enabled" -and $_.conditions.applications.includeApplications -eq "All" -and $_.conditions.users.includeUsers -eq "All" -and $_.grantControls.builtincontrols -eq "mfa" -and $_.conditions.userRiskLevels.length -lt 1 -and $_.conditions.signInRiskLevels.length -lt 1 } | Select-object -ExpandProperty Displayname) -join '<br />'
-        $Result.UserMFAbyCA = ($Result.Usermfabyca | measure-object).Count
+        $Result.UserMFAbyCA = [int]($Result.Usermfabyca | measure-object).Count
     }
     else {
         $Result.UserMFAbyCA = "Not Licensed for AADp1"
