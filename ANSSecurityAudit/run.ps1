@@ -118,13 +118,15 @@ try {
 
     $Result.PrivilegedUsersList = foreach ($Roleassignment in $roleAssignmentsGraph) {
 
-        $PrivilegedRolePrettyName = ($roleDefinitionsGraph | Where-Object { $_.id -eq $Roleassignment.roleDefinitionId }).displayName | Select-Object -Last 1
+        $PrivilegedRolePrettyName = ($roleDefinitionsGraph | Where-Object { $_.id -eq $Roleassignment.roleDefinitionId }) | Select-Object -Last 1
         $PrivilegedUserName = ($AllUsersAccountState | Where-Object { ( $_.id -eq $Roleassignment.principalId) -and ($_.accountenabled -eq 'True') } | Select-Object -First 1).userPrincipalName
         if ($PrivilegedRolePrettyName) {
             if ($PrivilegedUserName) {
                 [PSCustomObject]@{
                     User = $($PrivilegedUserName)
-                    Role = $($PrivilegedRolePrettyName)
+                    Role = $($PrivilegedRolePrettyName).displayName
+                    Privileged = $($PrivilegedRolePrettyName).isPrivileged
+                    Definition = $($PrivilegedRolePrettyName).description
                 }
             }
         }
