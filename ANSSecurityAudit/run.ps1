@@ -46,7 +46,7 @@ $Result = @{
     Usermfabyca                       = ''
     UserMFAbyCAname                   = ''
     PriviligedUsersCount = ''
-    PrivilegedUsersJSON = ''
+    PrivilegedUsersList = ''
 }
 
 # Starting the CIS Framework Analyser
@@ -116,7 +116,7 @@ try {
     $AllUsersAccountState = New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/users?select=userPrincipalName,id,accountEnabled' -tenantid $Tenantfilter
 
 
-    $PrivilegedUsersList = foreach ($Roleassignment in $roleAssignmentsGraph) {
+    $Result.PrivilegedUsersList = foreach ($Roleassignment in $roleAssignmentsGraph) {
 
         $PrivilegedRolePrettyName = ($roleDefinitionsGraph | Where-Object { $_.id -eq $Roleassignment.roleDefinitionId }).displayName | Select-Object -Last 1
         $PrivilegedUserName = ($AllUsersAccountState | Where-Object { ( $_.id -eq $Roleassignment.principalId) -and ($_.accountenabled -eq 'True') } | Select-Object -First 1).userPrincipalName
@@ -129,9 +129,7 @@ try {
             }
         }
     }
-    $result.test = $PrivilegedUsersList
-    $Result.PriviligedUsersCount = ($PrivilegedUsersList.User | Measure-object).count
-    $Result.PrivilegedUsersJSON = ConvertTo-Json -InputObject @($PrivilegedUsersList) -Compress
+    $Result.PriviligedUsersCount = ($Result.PrivilegedUsersList.User | Measure-object).count
 }
 catch {
     Write-LogMessage -API 'ANSSecurityAudit' -tenant $Tenantfilter -message "Global Admin List on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
