@@ -111,9 +111,9 @@ catch {
 
 #Populate Privileged User List
 try {
-    $roleAssignmentsGraph = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments" -tenantid $Tenantfilter -AsApp $true
-    $roleDefinitionsGraph = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions" -tenantid $Tenantfilter -AsApp $true
-    $AllUsersAccountState = New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/users?select=userPrincipalName,id' -tenantid $Tenantfilter
+    $roleAssignmentsGraph = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments" -tenantid $Tenantfilter
+    $roleDefinitionsGraph = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions" -tenantid $Tenantfilter
+    $AllUsersAccountState = New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/users?select=userPrincipalName,id,accountEnabled' -tenantid $Tenantfilter
 
 
     $PrivilegedUsersList = foreach ($Roleassignment in $roleAssignmentsGraph) {
@@ -129,6 +129,7 @@ try {
             }
         }
     }
+    $result.test = $PrivilegedUsersList
     $Result.PriviligedUsersCount = ($PrivilegedUsersList.User | Measure-object).count
     $Result.PrivilegedUsersJSON = ConvertTo-Json -InputObject @($PrivilegedUsersList) -Compress
 }
