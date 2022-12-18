@@ -45,8 +45,8 @@ $Result = @{
     Backupify                         = ''
     Usermfabyca                       = ''
     UserMFAbyCAname                   = ''
-    PriviligedUsersCount = ''
-    PrivilegedUsersList = ''
+    PriviligedUsersCount              = ''
+    PrivilegedUsersList               = ''
 }
 
 # Starting the CIS Framework Analyser
@@ -111,22 +111,19 @@ catch {
 
 #Populate Privileged User List
 try {
-    $roleAssignmentsGraph = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/roleManagement/directory/roleAssignments" -tenantid $Tenantfilter
-    $roleDefinitionsGraph = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/roleManagement/directory/roleDefinitions" -tenantid $Tenantfilter
-    $AllUsersAccountState = New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/users?select=userPrincipalName,id,accountEnabled' -tenantid $Tenantfilter
-
-
-    $Result.PrivilegedUsersList = foreach ($Roleassignment in $roleAssignmentsGraph) {
-
-        $PrivilegedRolePrettyName = ($roleDefinitionsGraph | Where-Object { $_.id -eq $Roleassignment.roleDefinitionId }) | Select-Object -Last 1
-        $PrivilegedUserName = ($AllUsersAccountState | Where-Object { ( $_.id -eq $Roleassignment.principalId) -and ($_.accountenabled -eq 'True') } | Select-Object -First 1).userPrincipalName
-        if ($PrivilegedRolePrettyName) {
-            if ($PrivilegedUserName) {
-                [PSCustomObject]@{
-                    User = $($PrivilegedUserName)
-                    Role = $($PrivilegedRolePrettyName).displayName
-                    Privileged = $($PrivilegedRolePrettyName).isPrivileged
-                    Definition = $($PrivilegedRolePrettyName).description
+    $Roles = New-GraphGetRequest -uri "https://graph.microsoft.com/v1.0/directoryRoles?`$expand=members" -tenantid $TenantFilter
+    $Result.PrivilegedUsersList = foreach ($Role in $Roles) {
+        
+        #$Members = if ($Role.members) { $role.members | ForEach-Object { " ($($_.userPrincipalName)) ($($_.accountEnabled))" } }
+        $Members = if ($Role.members) {
+            $role.members | Where-object { ($_.accountEnabled -eq "True") -and ($Null -ne $_.userPrincipalName) } | Select-Object -ExpandProperty userPrincipalName
+            if ($Members) {
+                foreach ($Member in $Members) {
+                    [PSCustomObject]@{
+                        User        = $Member
+                        DisplayName = $Role.displayName
+                        Description = $Role.description
+                    }
                 }
             }
         }
