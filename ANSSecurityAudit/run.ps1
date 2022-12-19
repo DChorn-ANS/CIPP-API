@@ -144,7 +144,7 @@ try {
             [PSCustomObject]@{
                 DisplayName    = $StaleUser.displayName
                 UPN            = $StaleUser.userPrincipalName
-                lastSignInDate = $StaleUser.signInActivity.lastSignInDateTime
+                lastSignInDate = $StaleUser.signInActivity.lastSignInDateTime.gettype().name
             }
             $AllStaleUsers += $StaleUserObject}
     }
