@@ -49,6 +49,7 @@ $Result = @{
     PrivilegedUsersList               = ''
     AllStaleUsersList                 = ''
     AllStaleUsersCount                = ''
+    test=''
 }
 
 # Starting the CIS Framework Analyser
@@ -149,6 +150,7 @@ try {
         }
         $AllStaleUsers += $StaleUserObject 
     }
+    $Result.test = $StaleUsers
     $Result.AllStaleUsersList = $AllStaleUsers
     $Result.AllStaleUsersCount = ($Result.AllStaleUsers.UPN | Measure-object).count
 }
