@@ -49,7 +49,7 @@ $Result = @{
     PrivilegedUsersList               = ''
     AllStaleUsersList                 = ''
     AllStaleUsersCount                = ''
-    test=''
+    test                              = ''
 }
 
 # Starting the CIS Framework Analyser
@@ -139,14 +139,13 @@ try {
     $StaleUsers = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/users?`$filter=accountEnabled eq true and assignedLicenses/`$count ne 0&`$count=true &`$select=displayName,userPrincipalName,signInActivity" -tenantid $TenantFilter -ComplexFilter
     $AllStaleUsers = @()
     foreach ($StaleUser in $StaleUsers) {
-        if (($StaleUser.accountEnabled -eq "true") -and ($Null -ne $_.displayName)) {
-            $StaleUserObject = 
-            [PSCustomObject]@{
-                DisplayName    = $StaleUser.displayName
-                UPN            = $StaleUser.userPrincipalName
-                lastSignInDate = $StaleUser.signInActivity.lastSignInDateTime.gettype().name
-            }
-            $AllStaleUsers += $StaleUserObject}
+        $StaleUserObject = 
+        [PSCustomObject]@{
+            DisplayName    = $StaleUser.displayName
+            UPN            = $StaleUser.userPrincipalName
+            lastSignInDate = $StaleUser.signInActivity.lastSignInDateTime.gettype().name
+        }
+        $AllStaleUsers += $StaleUserObject
     }
     $Result.test = $StaleUsers
     $Result.AllStaleUsersList = $AllStaleUsers
