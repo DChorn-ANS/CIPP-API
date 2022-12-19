@@ -140,15 +140,14 @@ try {
     $StaleUsers = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/users?`$filter=signInActivity/lastSignInDateTime le $staledate &`$select=accountEnabled,displayName,userPrincipalName,signInActivity,assignedLicenses" -tenantid $TenantFilter -ComplexFilter
     $AllStaleUsers = @()
     foreach ($StaleUser in $StaleUsers) {
-        if (($StaleUser.accountEnabled -eq "True") -and ($Null -ne $_.displayName)) {
+        if (($StaleUser.accountEnabled -eq "true") -and ($Null -ne $_.displayName)) {
             $StaleUserObject = 
             [PSCustomObject]@{
                 DisplayName    = $StaleUser.displayName
                 UPN            = $StaleUser.userPrincipalName
                 lastSignInDate = $StaleUser.signInActivity.lastSignInDateTime
             }
-        }
-        $AllStaleUsers += $StaleUserObject 
+            $AllStaleUsers += $StaleUserObject}
     }
     $Result.test = $StaleUsers
     $Result.AllStaleUsersList = $AllStaleUsers
