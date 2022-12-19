@@ -147,13 +147,14 @@ try {
                     UPN            = $StaleUser.userPrincipalName
                     lastSignInDate = $LastSignInDate
                 }}
-        }Catch{$LastSignInDate = "No Sign In Logged"}
+        }Catch{$LastSignInDate = "No Sign In Logged"
         $StaleUserObject = 
             [PSCustomObject]@{
                 DisplayName    = $StaleUser.displayName
                 UPN            = $StaleUser.userPrincipalName
                 lastSignInDate = $LastSignInDate
             }
+        }
         $AllStaleUsers += $StaleUserObject
     }
 
@@ -228,11 +229,11 @@ catch {
 
 # Check if Backupify is Deployed
 try {
-    $Result.Backupify = New-GraphGetRequest -Uri 'https://graph.microsoft.com/v1.0/servicePrincipals/fdaecf07-735e-46f0-aad0-6c2835d241b0' -tenantid $tenantfilter | Select-Object -ExpandProperty accountEnabled
+    $backupifygraph = New-GraphGetRequest -Uri 'https://graph.microsoft.com/v1.0/servicePrincipals?$search="displayName: Backupify"' -tenantid $tenantfilter -Complexfilter
+if(!$BackupifyGraph){    $Result.Backupify = "Backupify not present"}else{$Result.Backupify = $true}
 }
 catch {
     Write-LogMessage -API 'ANSBestPracticeAnalyser' -tenant $tenant -message "Backupify on $($tenant) Error: $($_.exception.message)" -sev 'Error'
-    $Result.Backupify = "Backupify not present"
 }
 
 # All Users MFA CA Policy
