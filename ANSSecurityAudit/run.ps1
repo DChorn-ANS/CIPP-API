@@ -136,8 +136,7 @@ catch {
 
 #Stale Licensed Users List
 try {
-    $Staledate = (get-date((Get-Date).AddDays(-30).ToUniversalTime()) -format s) + "Z"
-    $StaleUsers = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/users?`$filter=signInActivity/lastSignInDateTime le $staledate &`$select=accountEnabled,displayName,userPrincipalName,signInActivity,assignedLicenses" -tenantid $TenantFilter -ComplexFilter
+    $StaleUsers = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/users?`$filter=accountEnabled eq true and assignedLicenses/`$count ne 0&`$count=true &`$select=displayName,userPrincipalName,signInActivity" -tenantid $TenantFilter -ComplexFilter
     $AllStaleUsers = @()
     foreach ($StaleUser in $StaleUsers) {
         if (($StaleUser.accountEnabled -eq "true") -and ($Null -ne $_.displayName)) {
