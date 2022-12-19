@@ -47,6 +47,8 @@ $Result = @{
     UserMFAbyCAname                   = ''
     PriviligedUsersCount              = ''
     PrivilegedUsersList               = ''
+    AllStaleUsersList                 = ''
+    AllStaleUsersCount                = ''
 }
 
 # Starting the CIS Framework Analyser
@@ -112,19 +114,43 @@ try {
     $Roles = New-GraphGetRequest -uri "https://graph.microsoft.com/v1.0/directoryRoles?`$expand=members" -tenantid $TenantFilter
     $AllRoleAssignments = @()
     foreach ($Role in $Roles) {
-        $Members = if ($role.members) { $role.members | Where-object { ($_.accountEnabled -eq "True") -and ($Null -ne $_.userPrincipalName) } | Select-Object -ExpandProperty userPrincipalName}
-            if ($Members) {
-              $UserAssignment = foreach ($Member in $Members) {
-                    [PSCustomObject]@{
-                        User        = $Member
-                        DisplayName = $Role.displayName
-                        Description = $Role.description
-                    }
+        $Members = if ($role.members) { $role.members | Where-object { ($_.accountEnabled -eq "True") -and ($Null -ne $_.userPrincipalName) } | Select-Object -ExpandProperty userPrincipalName }
+        if ($Members) {
+            $UserAssignment = foreach ($Member in $Members) {
+                [PSCustomObject]@{
+                    User        = $Member
+                    DisplayName = $Role.displayName
+                    Description = $Role.description
                 }
-                $AllRoleAssignments += $UserAssignment }
+            }
+            $AllRoleAssignments += $UserAssignment 
         }
+    }
     $Result.PrivilegedUsersList = $AllRoleAssignments
     $Result.PriviligedUsersCount = ($Result.PrivilegedUsersList.User | Measure-object).count
+}
+catch {
+    Write-LogMessage -API 'ANSSecurityAudit' -tenant $Tenantfilter -message "All Admin User List on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
+}
+
+#Stale Licensed Users List
+try {
+    $Staledate = (get-date((Get-Date).AddDays(-30).ToUniversalTime()) -format s) + "Z"
+    $StaleUsers = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/users?`$filter=signInActivity/lastSignInDateTime le $staledate &`$select=accountEnabled,displayName,userPrincipalName,signInActivity,assignedLicenses" -tenantid $TenantFilter -ComplexFilter
+    $AllStaleUsers = @()
+    foreach ($StaleUser in $StaleUsers) {
+        if (($StaleUser.accountEnabled -eq "True") -and ($Null -ne $_.displayName)) {
+            $StaleUserObject = 
+            [PSCustomObject]@{
+                DisplayName    = $StaleUser.displayName
+                UPN            = $StaleUser.userPrincipalName
+                lastSignInDate = $StaleUser.signInActivity.lastSignInDateTime
+            }
+        }
+        $AllStaleUsers += $StaleUserObject 
+    }
+    $Result.AllStaleUsersList = $AllStaleUsers
+    $Result.AllStaleUsersCount = ($Result.AllStaleUsers.UPN | Measure-object).count
 }
 catch {
     Write-LogMessage -API 'ANSSecurityAudit' -tenant $Tenantfilter -message "All Admin User List on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
