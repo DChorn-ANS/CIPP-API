@@ -139,19 +139,24 @@ try {
     $StaleUsers = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/users?`$filter=accountEnabled eq true and assignedLicenses/`$count ne 0&`$count=true &`$select=displayName,userPrincipalName,signInActivity" -tenantid $TenantFilter -ComplexFilter
     $AllStaleUsers = @()
     foreach ($StaleUser in $StaleUsers) {
-        if ($null -eq $_.signInActivity.lastSignInDateTime){$LastSignInDate = "No Sign in Logged"}{
-        if ((Get-date $_.signInActivity.lastSignInDateTime) -le ((get-date).AddDays(-30))) {$LastSignInDate = $_.signInActivity.lastSignInDateTime}
-        }
-            $StaleUserObject = 
+        try{
+            if ((Get-date $_.signInActivity.lastSignInDateTime) -le ((get-date).AddDays(-30))) {$LastSignInDate = $_.signInActivity.lastSignInDateTime
+                $StaleUserObject = 
+                [PSCustomObject]@{
+                    DisplayName    = $StaleUser.displayName
+                    UPN            = $StaleUser.userPrincipalName
+                    lastSignInDate = $LastSignInDate
+                }}
+        }Catch{$LastSignInDate = "No Sign In Logged"}
+        $StaleUserObject = 
             [PSCustomObject]@{
                 DisplayName    = $StaleUser.displayName
                 UPN            = $StaleUser.userPrincipalName
                 lastSignInDate = $LastSignInDate
             }
-
         $AllStaleUsers += $StaleUserObject
     }
-        
+
     $Result.test = $StaleUsers
     $Result.AllStaleUsersList = $AllStaleUsers
     $Result.AllStaleUsersCount = ($Result.AllStaleUsers.UPN | Measure-object).count
