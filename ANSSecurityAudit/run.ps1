@@ -136,6 +136,7 @@ catch {
 
 #Stale Licensed Users List
 try {
+    $StaleDate = (get-date).AddDays(-30)
     $StaleUsers = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/users?`$filter=accountEnabled eq true and assignedLicenses/`$count ne 0&`$count=true &`$select=displayName,userPrincipalName,signInActivity" -tenantid $TenantFilter -ComplexFilter
     $AllStaleUsers = @()
     foreach ($StaleUser in $StaleUsers) {
@@ -145,7 +146,9 @@ try {
             UPN            = $StaleUser.userPrincipalName
             lastSignInDate = $StaleUser.signInActivity.lastSignInDateTime
         }
-    $AllStaleUsers += $StaleUserObject
+        if ($null -ne $StaleUserObject.lastSignInDate){
+            if((get-date $StaleUserObject.lastSignInDate) -le $StaleDate){$AllStaleUsers += $StaleUserObject}
+        }else{$AllStaleUsers += $StaleUserObject}
 }
     $Result.test = $StaleUsers
     $Result.AllStaleUsersList = $AllStaleUsers
