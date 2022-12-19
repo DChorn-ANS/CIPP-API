@@ -141,9 +141,9 @@ try {
     foreach ($StaleUser in $StaleUsers) {
         $StaleUserObject = 
         [PSCustomObject]@{
-            DisplayName    = $_.displayName
-            UPN            = $_.userPrincipalName
-            lastSignInDate = $_.signInActivity.lastSignInDateTime
+            DisplayName    = $StaleUser.displayName
+            UPN            = $StaleUser.userPrincipalName
+            lastSignInDate = $StaleUser.signInActivity.lastSignInDateTime
         }
     $AllStaleUsers += $StaleUserObject
 }
