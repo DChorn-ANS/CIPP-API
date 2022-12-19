@@ -156,27 +156,7 @@ try {
     }else{}
     $AllStaleUsers += $StaleUserObject
 }
-        
-        
-        
-        try{
-            if ((Get-date $_.signInActivity.lastSignInDateTime) -le ((get-date).AddDays(-30))) {$LastSignInDate = $_.signInActivity.lastSignInDateTime
-                $StaleUserObject = 
-                [PSCustomObject]@{
-                    DisplayName    = $StaleUser.displayName
-                    UPN            = $StaleUser.userPrincipalName
-                    lastSignInDate = $LastSignInDate
-                }}
-        }Catch{$LastSignInDate = "No Sign In Logged"
-        $StaleUserObject = 
-            [PSCustomObject]@{
-                DisplayName    = $StaleUser.displayName
-                UPN            = $StaleUser.userPrincipalName
-                lastSignInDate = $LastSignInDate
-            }
-        }
-        $AllStaleUsers += $StaleUserObject
-    }
+
 
     $Result.test = $StaleUsers
     $Result.AllStaleUsersList = $AllStaleUsers
