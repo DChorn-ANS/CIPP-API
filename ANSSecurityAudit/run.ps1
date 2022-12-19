@@ -101,9 +101,7 @@ catch {
 #Populate Global Admin List
 try {
     $GlobalAdminGraph = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/directoryRoles/roleTemplateId=62e90394-69f5-4237-9190-012177145e10/members" -tenantid $Tenantfilter
-    $AdminList = ($GlobalAdminGraph | Where-object { ($_.accountEnabled -eq "True") -and ($Null -ne $_.userPrincipalName) } | Select-Object -ExpandProperty userPrincipalName) -join '<br />'
-    $ServicePrincipalList = ($GlobalAdminGraph | Where-object { ($_.accountEnabled -eq "True") -and ($Null -ne $_.appDisplayName) } | Select-Object -ExpandProperty appDisplayName) -join '<br />'
-    $Result.GlobalAdminList = $AdminList + '<br />' + $ServicePrincipalList
+    $Result.GlobalAdminList = ($GlobalAdminGraph | Where-object { ($_.accountEnabled -eq "True") -and ($Null -ne $_.userPrincipalName) } | Select-Object -ExpandProperty userPrincipalName) -join '<br />'
 }
 catch {
     Write-LogMessage -API 'ANSSecurityAudit' -tenant $Tenantfilter -message "Global Admin List on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
@@ -112,26 +110,24 @@ catch {
 #Populate Privileged User List
 try {
     $Roles = New-GraphGetRequest -uri "https://graph.microsoft.com/v1.0/directoryRoles?`$expand=members" -tenantid $TenantFilter
-    $Result.PrivilegedUsersList = foreach ($Role in $Roles) {
-        
-        #$Members = if ($Role.members) { $role.members | ForEach-Object { " ($($_.userPrincipalName)) ($($_.accountEnabled))" } }
-        $Members = if ($Role.members) {
-            $role.members | Where-object { ($_.accountEnabled -eq "True") -and ($Null -ne $_.userPrincipalName) } | Select-Object -ExpandProperty userPrincipalName
+    $AllRoleAssignments = @()
+    foreach ($Role in $Roles) {
+        $Members = if ($role.members) { $role.members | Where-object { ($_.accountEnabled -eq "True") -and ($Null -ne $_.userPrincipalName) } | Select-Object -ExpandProperty userPrincipalName}
             if ($Members) {
-                foreach ($Member in $Members) {
+              $UserAssignment = foreach ($Member in $Members) {
                     [PSCustomObject]@{
                         User        = $Member
                         DisplayName = $Role.displayName
                         Description = $Role.description
                     }
                 }
-            }
+                $AllRoleAssignments += $UserAssignment }
         }
-    }
+    $Result.PrivilegedUsersList = $AllRoleAssignments
     $Result.PriviligedUsersCount = ($Result.PrivilegedUsersList.User | Measure-object).count
 }
 catch {
-    Write-LogMessage -API 'ANSSecurityAudit' -tenant $Tenantfilter -message "Global Admin List on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
+    Write-LogMessage -API 'ANSSecurityAudit' -tenant $Tenantfilter -message "All Admin User List on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
 }
 
 # Get Self Service Password Reset State
