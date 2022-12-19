@@ -151,7 +151,7 @@ try {
         }else{$AllStaleUsers += $StaleUserObject}
 }
     $Result.test = $StaleUsers
-    $Result.AllStaleUsersList = $AllStaleUsers
+    $Result.AllStaleUsersList = $AllStaleUsers | sort-object lastSignInDate
     $Result.AllStaleUsersCount = ($Result.AllStaleUsersList.UPN | Measure-object).count
 }
 catch {
