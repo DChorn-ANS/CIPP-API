@@ -159,7 +159,7 @@ try {
 
     $Result.test = $StaleUsers
     $Result.AllStaleUsersList = $AllStaleUsers
-    $Result.AllStaleUsersCount = ($Result.AllStaleUsers.UPN | Measure-object).count
+    $Result.AllStaleUsersCount = ($Result.AllStaleUsersList.UPN | Measure-object).count
 }
 catch {
     Write-LogMessage -API 'ANSSecurityAudit' -tenant $Tenantfilter -message "All Admin User List on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
