@@ -139,6 +139,26 @@ try {
     $StaleUsers = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/users?`$filter=accountEnabled eq true and assignedLicenses/`$count ne 0&`$count=true &`$select=displayName,userPrincipalName,signInActivity" -tenantid $TenantFilter -ComplexFilter
     $AllStaleUsers = @()
     foreach ($StaleUser in $StaleUsers) {
+        if(!$StaleUser.signInActivity.lastSignInDateTime){$LastSignInDate = "No Sign In Logged"
+        $StaleUserObject = 
+        [PSCustomObject]@{
+            DisplayName    = $StaleUser.displayName
+            UPN            = $StaleUser.userPrincipalName
+            lastSignInDate = $LastSignInDate
+        }
+    }elseif ((Get-date $_.signInActivity.lastSignInDateTime) -le ((get-date).AddDays(-30))) {$LastSignInDate = $_.signInActivity.lastSignInDateTime
+        $StaleUserObject = 
+        [PSCustomObject]@{
+            DisplayName    = $StaleUser.displayName
+            UPN            = $StaleUser.userPrincipalName
+            lastSignInDate = $LastSignInDate
+        }
+    }else{}
+    $AllStaleUsers += $StaleUserObject
+}
+        
+        
+        
         try{
             if ((Get-date $_.signInActivity.lastSignInDateTime) -le ((get-date).AddDays(-30))) {$LastSignInDate = $_.signInActivity.lastSignInDateTime
                 $StaleUserObject = 
