@@ -140,21 +140,21 @@ try {
     $AllStaleUsers = @()
     foreach ($StaleUser in $StaleUsers) {
         if ($null -eq $_.signInActivity.lastSignInDateTime){$LastSignInDate = "No Sign in Logged"}{
-        if ((Get-date $_.signInActivity.lastSignInDateTime) -le ((get-date).AddDays(-30))) {
-            $LastSignInDate = $_.signInActivity.lastSignInDateTime
+        if ((Get-date $_.signInActivity.lastSignInDateTime) -le ((get-date).AddDays(-30))) {$LastSignInDate = $_.signInActivity.lastSignInDateTime}
+        }
             $StaleUserObject = 
             [PSCustomObject]@{
                 DisplayName    = $StaleUser.displayName
                 UPN            = $StaleUser.userPrincipalName
                 lastSignInDate = $LastSignInDate
             }
-            $AllStaleUsers += $StaleUserObject}
-        }
+
+        $AllStaleUsers += $StaleUserObject
+    }
         
     $Result.test = $StaleUsers
     $Result.AllStaleUsersList = $AllStaleUsers
     $Result.AllStaleUsersCount = ($Result.AllStaleUsers.UPN | Measure-object).count
-}
 }
 catch {
     Write-LogMessage -API 'ANSSecurityAudit' -tenant $Tenantfilter -message "All Admin User List on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
