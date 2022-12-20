@@ -49,6 +49,11 @@ $Result = @{
     PrivilegedUsersList               = ''
     AllStaleUsersList                 = ''
     AllStaleUsersCount                = ''
+    SecureScorePercentage = ''
+    DisabledSharedMailboxLogins = ''
+    DisabledSharedMailboxLoginsCount = ''
+    AdminConsentForApplications = ''
+    UnifiedAuditLog = ''
     test=''
 }
 
@@ -67,6 +72,7 @@ try {
     $Result.PasswordHashSync = $SecureScore.controlScores | where-object { $_.controlName -eq "PasswordHashSync" } | Select-Object -ExpandProperty on
     $Result.PWAgePolicyNew = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "PWAgePolicyNew" } | Select-Object -ExpandProperty expiry)
     $Result.CustomerLockbox = $SecureScore.controlScores | where-object { $_.controlName -eq "CustomerLockBoxEnabled" } | Select-Object -ExpandProperty on
+    $Result.SecureScorePercentage = [int](($SecureScore.currentScore / $SecureScore.maxScore) * 100)
 
     
     #DLP License required
@@ -150,7 +156,6 @@ try {
             if((get-date $StaleUserObject.lastSignInDate) -le $StaleDate){$AllStaleUsers += $StaleUserObject}
         }else{$AllStaleUsers += $StaleUserObject}
 }
-    $Result.test = $StaleUsers
     $Result.AllStaleUsersList = $AllStaleUsers | sort-object lastSignInDate
     $Result.AllStaleUsersCount = ($Result.AllStaleUsersList.UPN | Measure-object).count
 }
@@ -228,6 +233,26 @@ catch {
     Write-LogMessage -API 'ANSBestPracticeAnalyser' -tenant $tenant -message "Backupify on $($tenant) Error: $($_.exception.message)" -sev 'Error'
 }
 
+# Get Shared Mailbox Stuff
+try {
+    $SharedMailboxList = (New-GraphGetRequest -uri "https://outlook.office365.com/adminapi/beta/$($tenant)/Mailbox?`$filter=RecipientTypeDetails eq 'SharedMailbox'" -Tenantid $tenant -scope ExchangeOnline)
+    $AllUsersAccountState = New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/users?select=userPrincipalName,accountEnabled' -tenantid $Tenant
+    $EnabledUsersWithSharedMailbox = foreach ($SharedMailbox in $SharedMailboxList) {
+        # Match the User
+        $User = $AllUsersAccountState | Where-Object { $_.userPrincipalName -eq $SharedMailbox.userPrincipalName } | Select-Object -First 1
+        if ($User.accountEnabled) {
+            $User.userPrincipalName
+        }
+    }
+    
+    if (($EnabledUsersWithSharedMailbox | Measure-Object | Select-Object -ExpandProperty Count) -gt 0) { $Result.DisabledSharedMailboxLogins = ($EnabledUsersWithSharedMailbox) -join '<br />' } else { $Result.DisabledSharedMailboxLogins = 'PASS' } 
+    $Result.DisabledSharedMailboxLoginsCount = $EnabledUsersWithSharedMailbox | Measure-Object | Select-Object -ExpandProperty Count
+}
+catch {
+    Write-LogMessage -API 'BestPracticeAnalyser' -tenant $tenant -message "Shared Mailbox Enabled Accounts on $($tenant). Error: $($_.exception.message)" -sev 'Error'  
+}
+
+
 # All Users MFA CA Policy
 try {
     if ($result.HasAADP1 -eq $True) {
@@ -242,6 +267,26 @@ try {
 catch {
     Write-LogMessage -API 'ANSSecurityAudit' -tenant $Tenantfilter -message "MFA Enforced by CA on $($Tenantfilter) Error: $($_.exception.message)" -sev 'Error'
 }
+
+# Get OAuth Admin Consenst
+try {
+    $GraphRequest = New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/policies/authorizationPolicy/authorizationPolicy' -tenantid $Tenant
+    $Result.AdminConsentForApplications = if ($GraphRequest.permissionGrantPolicyIdsAssignedToDefaultUserRole -eq 'ManagePermissionGrantsForSelf.microsoft-user-default-legacy') { $true } else { $false }
+}
+catch {
+    Write-LogMessage -API 'BestPracticeAnalyser' -tenant $tenant -message "OAuth Admin Consent on $($tenant). Error: $($_.exception.message)" -sev 'Error'   
+}
+
+# Get Unified Audit Log
+try {
+    $EXOAdminAuditLogConfig = New-ExoRequest -tenantid $Tenant -cmdlet 'Get-AdminAuditLogConfig'
+    $Result.UnifiedAuditLog = $EXOAdminAuditLogConfig | Select-Object -ExpandProperty UnifiedAuditLogIngestionEnabled
+    
+}
+catch {
+    Write-LogMessage -API 'BestPracticeAnalyser' -tenant $tenant -message "Unified Audit Log on $($tenant). Error: $($_.exception.message)" -sev 'Error'
+}
+
 
 #Display Results
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
