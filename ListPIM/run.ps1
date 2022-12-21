@@ -12,6 +12,7 @@ try {
     $Assignmentschedules = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/roleManagement/directory/roleAssignmentSchedules?`$expand=roleDefinition,principal" -tenantid $Tenantfilter
     $SchedulesSplat = @()
 foreach ($EligibleSchedule in $eligbleschedules){
+    $Expiration = if($null -eq $EligibleSchedule.scheduleInfo.expiration.endDateTime){"Permanent"}else{Get-Date $EligibleSchedule.scheduleInfo.expiration.endDateTime -format g}
 $object = [PSCustomObject]@{
     principalId = $EligibleSchedule.principalID
     roleDefinitionId = $EligibleSchedule.roleDefinitionId
@@ -22,11 +23,12 @@ $object = [PSCustomObject]@{
     status = $EligibleSchedule.status
     assignment = "Eligible"
     startDateTime = get-date $EligibleSchedule.scheduleInfo.startDateTime -format g
-    expiration = $EligibleSchedule.scheduleInfo.expiration.endDateTime
+    expiration = $Expiration
  }
     $SchedulesSplat += $object
     }
     foreach ($Assignmentschedule in $Assignmentschedules){
+        $Expiration = if($null -eq $Assignmentschedule.scheduleInfo.expiration.endDateTime){"Permanent"}else{Get-Date $Assignmentschedule.scheduleInfo.expiration.endDateTime -format g}
         $object = [PSCustomObject]@{
             principalId = $Assignmentschedule.principalID
             roleDefinitionId = $Assignmentschedule.roleDefinitionId
@@ -37,7 +39,7 @@ $object = [PSCustomObject]@{
             status = $Assignmentschedule.status
             assignment = "Active"
             startDateTime =  get-date $Assignmentschedule.scheduleInfo.startDateTime -format g
-            expiration = $Assignmentschedule.scheduleInfo.expiration.endDateTime
+            expiration = $Expiration
          }
             $SchedulesSplat += $object
         }
