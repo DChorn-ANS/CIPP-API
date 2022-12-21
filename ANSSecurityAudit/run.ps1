@@ -68,7 +68,6 @@ try {
     $Result.HasDLP = $SecureScore.enabledServices.Contains("HasDLP")
     $Result.AdminMFAV2 = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "AdminMFAv2" } | Select-Object -ExpandProperty count)
     $Result.MFARegistrationV2 = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "MFARegistrationV2" } | Select-Object -ExpandProperty count)
-    $Result.GlobalAdminCount = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "OneAdmin" } | Select-Object -ExpandProperty count)
     $Result.PasswordHashSync = $SecureScore.controlScores | where-object { $_.controlName -eq "PasswordHashSync" } | Select-Object -ExpandProperty on
     $Result.PWAgePolicyNew = [int]($SecureScore.controlScores | where-object { $_.controlName -eq "PWAgePolicyNew" } | Select-Object -ExpandProperty expiry)
     $Result.CustomerLockbox = $SecureScore.controlScores | where-object { $_.controlName -eq "CustomerLockBoxEnabled" } | Select-Object -ExpandProperty on
@@ -111,6 +110,7 @@ catch {
 try {
     $GlobalAdminGraph = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/directoryRoles/roleTemplateId=62e90394-69f5-4237-9190-012177145e10/members" -tenantid $Tenantfilter
     $Result.GlobalAdminList = ($GlobalAdminGraph | Where-object { ($_.accountEnabled -eq "True") -and ($Null -ne $_.userPrincipalName) } | Select-Object -ExpandProperty userPrincipalName) -join '<br />'
+    $Result.GlobalAdminCount = ($GlobalAdminGraph | Where-object { ($_.accountEnabled -eq "True") -and ($Null -ne $_.userPrincipalName) } | Measure-Object).count
 }
 catch {
     Write-LogMessage -API 'ANSSecurityAudit' -tenant $Tenantfilter -message "Global Admin List on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
@@ -274,7 +274,7 @@ try {
     $Result.AdminConsentForApplications = if ($GraphRequest.permissionGrantPolicyIdsAssignedToDefaultUserRole -eq 'ManagePermissionGrantsForSelf.microsoft-user-default-legacy') { $true } else { $false }
 }
 catch {
-    Write-LogMessage -API 'BestPracticeAnalyser' -tenant $tenant -message "OAuth Admin Consent on $($tenant). Error: $($_.exception.message)" -sev 'Error'   
+    Write-LogMessage -API 'ANSSecurityAudit' -tenant $tenant -message "OAuth Admin Consent on $($tenant). Error: $($_.exception.message)" -sev 'Error'   
 }
 
 # Get Unified Audit Log
@@ -284,7 +284,7 @@ try {
     
 }
 catch {
-    Write-LogMessage -API 'BestPracticeAnalyser' -tenant $tenant -message "Unified Audit Log on $($tenant). Error: $($_.exception.message)" -sev 'Error'
+    Write-LogMessage -API 'ANSSecurityAudit' -tenant $tenant -message "Unified Audit Log on $($tenant). Error: $($_.exception.message)" -sev 'Error'
 }
 
 
