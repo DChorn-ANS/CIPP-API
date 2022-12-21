@@ -21,7 +21,7 @@ $object = [PSCustomObject]@{
     userPrincipalName = $EligibleSchedule.principal.userPrincipalName
     status = $EligibleSchedule.status
     assignment = "Eligible"
-    startDateTime = $EligibleSchedule.scheduleInfo.startDateTime
+    startDateTime = get-date $EligibleSchedule.scheduleInfo.startDateTime -format g
     expiration = $EligibleSchedule.scheduleInfo.expiration.endDateTime
  }
     $SchedulesSplat += $object
@@ -36,7 +36,7 @@ $object = [PSCustomObject]@{
             userPrincipalName = $Assignmentschedule.principal.userPrincipalName
             status = $Assignmentschedule.status
             assignment = "Active"
-            startDateTime = $Assignmentschedule.scheduleInfo.startDateTime
+            startDateTime =  get-date $Assignmentschedule.scheduleInfo.startDateTime -format g
             expiration = $Assignmentschedule.scheduleInfo.expiration.endDateTime
          }
             $SchedulesSplat += $object
