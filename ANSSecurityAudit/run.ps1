@@ -270,21 +270,21 @@ catch {
 
 # Get OAuth Admin Consenst
 try {
-    $GraphRequest = New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/policies/authorizationPolicy/authorizationPolicy' -tenantid $Tenant
+    $GraphRequest = New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/policies/authorizationPolicy/authorizationPolicy' -tenantid $Tenantfilter
     $Result.AdminConsentForApplications = if ($GraphRequest.permissionGrantPolicyIdsAssignedToDefaultUserRole -eq 'ManagePermissionGrantsForSelf.microsoft-user-default-legacy') { $true } else { $false }
 }
 catch {
-    Write-LogMessage -API 'ANSSecurityAudit' -tenant $tenant -message "OAuth Admin Consent on $($tenant). Error: $($_.exception.message)" -sev 'Error'   
+    Write-LogMessage -API 'ANSSecurityAudit' -tenant $Tenantfilter -message "OAuth Admin Consent on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error'   
 }
 
 # Get Unified Audit Log
 try {
-    $EXOAdminAuditLogConfig = New-ExoRequest -tenantid $Tenant -cmdlet 'Get-AdminAuditLogConfig'
+    $EXOAdminAuditLogConfig = New-ExoRequest -tenantid $Tenantfilter -cmdlet 'Get-AdminAuditLogConfig'
     $Result.UnifiedAuditLog = $EXOAdminAuditLogConfig | Select-Object -ExpandProperty UnifiedAuditLogIngestionEnabled
     
 }
 catch {
-    Write-LogMessage -API 'ANSSecurityAudit' -tenant $tenant -message "Unified Audit Log on $($tenant). Error: $($_.exception.message)" -sev 'Error'
+    Write-LogMessage -API 'ANSSecurityAudit' -tenant $Tenantfilter -message "Unified Audit Log on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error'
 }
 
 
