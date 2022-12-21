@@ -24,6 +24,7 @@ $object = [PSCustomObject]@{
  }
     $EligibleSchedulesSplat += $object
     }
+    $StatusCode = [HttpStatusCode]::OK
 }
 catch {
     $ErrorMessage = Get-NormalizedError -Message $_.Exception.Message
@@ -31,8 +32,8 @@ catch {
     $EligibleSchedulesSplat = $ErrorMessage
 }
 
-# Associate values to output bindings by calling 'Push-OutputBinding'.
+#Display Results
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
-        StatusCode = $StatusCode
-        Body       = @($EligibleSchedulesSplat)
-    })
+    StatusCode = $StatusCode
+    Body       = @($EligibleSchedulesSplat)
+}) -Clobber
