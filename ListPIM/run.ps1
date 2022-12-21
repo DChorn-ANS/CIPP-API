@@ -35,5 +35,5 @@ catch {
 #Display Results
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
     StatusCode = $StatusCode
-    Body       = @($EligibleSchedulesSplat)
+    Body       = $EligibleSchedulesSplat
 }) -Clobber
