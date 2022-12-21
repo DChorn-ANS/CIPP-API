@@ -20,7 +20,7 @@ $object = [PSCustomObject]@{
     userPrincipalName = $EligibleSchedule.principal.userPrincipalName
     status = $EligibleSchedule.status
     startDateTime = $EligibleSchedule.scheduleInfo.startDateTime
-    expiration = $EligibleSchedule.scheduleInfo.expiration
+    expiration = $EligibleSchedule.scheduleInfo.expiration.endDateTime
  }
     $EligibleSchedulesSplat += $object
     }
