@@ -9,7 +9,8 @@ $Tenantfilter = $request.Query.tenantfilter
 
 try {
     $eligbleschedules = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/roleManagement/directory/roleEligibilitySchedules?`$expand=roleDefinition,principal" -tenantid $Tenantfilter
-    $EligibleSchedulesSplat = @()
+    $Assignmentschedules = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/roleManagement/directory/roleAssignmentSchedules?`$expand=roleDefinition,principal" -tenantid $Tenantfilter
+    $SchedulesSplat = @()
 foreach ($EligibleSchedule in $eligbleschedules){
 $object = [PSCustomObject]@{
     principalId = $EligibleSchedule.principalID
@@ -19,21 +20,37 @@ $object = [PSCustomObject]@{
     displayName = $EligibleSchedule.principal.displayName
     userPrincipalName = $EligibleSchedule.principal.userPrincipalName
     status = $EligibleSchedule.status
+    assignment = "Eligible"
     startDateTime = $EligibleSchedule.scheduleInfo.startDateTime
     expiration = $EligibleSchedule.scheduleInfo.expiration.endDateTime
  }
-    $EligibleSchedulesSplat += $object
+    $SchedulesSplat += $object
     }
+    foreach ($Assignmentschedule in $Assignmentschedules){
+        $object = [PSCustomObject]@{
+            principalId = $Assignmentschedule.principalID
+            roleDefinitionId = $Assignmentschedule.roleDefinitionId
+            roleDisplayName = $Assignmentschedule.roleDefinition.displayName
+            accountEnabled = $Assignmentschedule.principal.accountEnabled
+            displayName = $Assignmentschedule.principal.displayName
+            userPrincipalName = $Assignmentschedule.principal.userPrincipalName
+            status = $Assignmentschedule.status
+            assignment = "Active"
+            startDateTime = $Assignmentschedule.scheduleInfo.startDateTime
+            expiration = $Assignmentschedule.scheduleInfo.expiration.endDateTime
+         }
+            $SchedulesSplat += $object
+        }
     $StatusCode = [HttpStatusCode]::OK
 }
 catch {
     $ErrorMessage = Get-NormalizedError -Message $_.Exception.Message
     $StatusCode = [HttpStatusCode]::Forbidden
-    $EligibleSchedulesSplat = $ErrorMessage
+    $SchedulesSplat = $ErrorMessage
 }
 
 #Display Results
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
     StatusCode = $StatusCode
-    Body       = $EligibleSchedulesSplat
+    Body       = $SchedulesSplat
 }) -Clobber
