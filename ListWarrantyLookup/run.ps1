@@ -326,7 +326,7 @@ function get-ToshibaWarranty
 function  Get-Warrantyinfo {
     [CmdletBinding()]
     Param(
-        [string]$DeviceSerial,
+        [string]$DeviceSerial
     )
     switch ($DeviceSerial.Length) {
         7 { get-DellWarranty -SourceDevice $DeviceSerial -client $Client }
