@@ -354,9 +354,8 @@ function  Get-Warrantyinfo {
 }
 
 # Interact with query parameters or the body of the request.
-$DeviceSerial = $Request.Query.DeviceSerial
 
-$Warranty = Get-Warrantyinfo -DeviceSerial $DeviceSerial
+$Warranty = Get-Warrantyinfo -DeviceSerial $($Request.Query.serialnumber)
 
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
