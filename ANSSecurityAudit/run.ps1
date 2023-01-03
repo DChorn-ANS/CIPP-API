@@ -160,7 +160,7 @@ try {
     $Result.AllStaleUsersCount = ($Result.AllStaleUsersList.UPN | Measure-object).count
 }
 catch {
-    Write-LogMessage -API 'ANSSecurityAudit' -tenant $Tenantfilter -message "All Admin User List on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
+    Write-LogMessage -API 'ANSSecurityAudit' -tenant $Tenantfilter -message "Stale User List on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
 }
 
 # Get Self Service Password Reset State
