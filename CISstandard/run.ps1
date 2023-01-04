@@ -21,26 +21,26 @@ if ($TenantFilter -eq 'AllTenants') {
 
 #Build Result Table
 $Result = @(
-    [PSCustomObject]@{Configuration = 'Ensure multifactor authentication is enabled for all users in administrative roles' ; LicenseLevel = 'E3 L1'; Controlv8 = '6.5' ; IGGroup = '1' ; Result = '' }
-    [PSCustomObject]@{Configuration = 'Ensure multifactor authentication is enabled for all users in all roles' ; LicenseLevel = 'E3 L2'; Controlv8 = '6.3' ; IGGroup = '2' ; Result = '' } 
-    [PSCustomObject]@{Configuration = 'Ensure that between two and four global admins are designated' ; LicenseLevel = 'E3 L1'; Controlv8 = '5.1' ; IGGroup = '1' ; Result = '' } 
-    [PSCustomObject]@{Configuration = 'Ensure self-service password reset is enabled' ; LicenseLevel = 'E3 L1'; Controlv8 = '14.3' ; IGGroup = '1' ; Result = '' } 
-    [PSCustomObject]@{Configuration = 'Ensure that password protection is enabled for Active Directory' ; LicenseLevel = 'E3 L1'; Controlv8 = '5.2' ; IGGroup = '1' ; Result = '' } 
-    [PSCustomObject]@{Configuration = 'Enable Conditional Access policies to block legacy authentication' ; LicenseLevel = 'E3 L1'; Controlv8 = '4.8' ; IGGroup = '2' ; Result = '' } 
-    [PSCustomObject]@{Configuration = 'Ensure that password hash sync is enabled for hybrid deployments' ; LicenseLevel = 'E3 L1'; Controlv8 = '6.7' ; IGGroup = '2' ; Result = '' } 
-    [PSCustomObject]@{Configuration = 'Enable Azure AD Identity Protection sign-in risk policies' ; LicenseLevel = 'E5 L2'; Controlv8 = '13.3' ; IGGroup = '2' ; Result = '' } 
-    [PSCustomObject]@{Configuration = 'Enable Azure AD Identity Protection user risk policies' ; LicenseLevel = 'E5 L2'; Controlv8 = '13.3' ; IGGroup = '2' ; Result = '' } 
+    [PSCustomObject]@{Configuration = 'Ensure multifactor authentication is enabled for all users in administrative roles' ; LicenseLevel = 'E3 L1'; Controlv8 = '6.5' ; IGGroup = '1' ; Result = '' ; ExpectedValue = '' ; Status = ''}
+    [PSCustomObject]@{Configuration = 'Ensure multifactor authentication is enabled for all users in all roles' ; LicenseLevel = 'E3 L2'; Controlv8 = '6.3' ; IGGroup = '2' ; Result = ''  ; ExpectedValue = '' ; Status = ''} 
+    [PSCustomObject]@{Configuration = 'Ensure that between two and four global admins are designated' ; LicenseLevel = 'E3 L1'; Controlv8 = '5.1' ; IGGroup = '1' ; Result = ''  ; ExpectedValue = '' ; Status = ''} 
+    [PSCustomObject]@{Configuration = 'Ensure self-service password reset is enabled' ; LicenseLevel = 'E3 L1'; Controlv8 = '14.3' ; IGGroup = '1' ; Result = ''  ; ExpectedValue = '' ; Status = ''} 
+    [PSCustomObject]@{Configuration = 'Ensure that password protection is enabled for Active Directory' ; LicenseLevel = 'E3 L1'; Controlv8 = '5.2' ; IGGroup = '1' ; Result = ''  ; ExpectedValue = '' ; Status = ''} 
+    [PSCustomObject]@{Configuration = 'Enable Conditional Access policies to block legacy authentication' ; LicenseLevel = 'E3 L1'; Controlv8 = '4.8' ; IGGroup = '2' ; Result = ''  ; ExpectedValue = '' ; Status = ''} 
+    [PSCustomObject]@{Configuration = 'Ensure that password hash sync is enabled for hybrid deployments' ; LicenseLevel = 'E3 L1'; Controlv8 = '6.7' ; IGGroup = '2' ; Result = ''  ; ExpectedValue = '' ; Status = ''} 
+    [PSCustomObject]@{Configuration = 'Enable Azure AD Identity Protection sign-in risk policies' ; LicenseLevel = 'E5 L2'; Controlv8 = '13.3' ; IGGroup = '2' ; Result = ''  ; ExpectedValue = '' ; Status = ''} 
+    [PSCustomObject]@{Configuration = 'Enable Azure AD Identity Protection user risk policies' ; LicenseLevel = 'E5 L2'; Controlv8 = '13.3' ; IGGroup = '2' ; Result = ''  ; ExpectedValue = '' ; Status = ''} 
     [PSCustomObject]@{Configuration = 'Use Just In Time privileged access to Office 365 roles' ; LicenseLevel = 'E5 L2'; Controlv8 = '6.1, 6.2' ; IGGroup = '1' ; Result = '' } 
-    [PSCustomObject]@{Configuration = 'Ensure Security Defaults is disabled on Azure Active Directory' ; LicenseLevel = 'E3 L1'; Controlv8 = '4.8' ; IGGroup = '2' ; Result = '' } 
-    [PSCustomObject]@{Configuration = 'Ensure that only organizationally managed/approved public groups exist' ; LicenseLevel = 'E3 L2'; Controlv8 = '3.3' ; IGGroup = '1' ; Result = '' } 
-    [PSCustomObject]@{Configuration = 'Ensure that collaboration invitations are sent to allowed domains only' ; LicenseLevel = 'E3 L2'; Controlv8 = '6.1' ; IGGroup = '1' ; Result = '' } 
-    [PSCustomObject]@{Configuration = 'Ensure that LinkedIn contact synchronization is disabled' ; LicenseLevel = 'E3 L2'; Controlv8 = '4.8' ; IGGroup = '' ; Result = '2' } 
-    [PSCustomObject]@{Configuration = 'Ensure Sign-in frequency is enabled and browser sessions are not persistent for Administrative users' ; LicenseLevel = 'E3 L1'; Controlv8 = '4.3' ; IGGroup = '1' ; Result = '' } 
-    [PSCustomObject]@{Configuration = 'Ensure the option to remain signed in is hidden' ; LicenseLevel = 'E3 L2'; Controlv8 = '16.3' ; IGGroup = '2' ; Result = '' } 
-    [PSCustomObject]@{Configuration = 'Ensure modern authentication for Exchange Online is enabled' ; LicenseLevel = 'E3 L1'; Controlv8 = '3.10' ; IGGroup = '2' ; Result = '' } 
-    [PSCustomObject]@{Configuration = 'Ensure modern authentication for SharePoint applications is required' ; LicenseLevel = 'E3 L1'; Controlv8 = '3.10' ; IGGroup = '2' ; Result = '' } 
-    [PSCustomObject]@{Configuration = 'Ensure that Office 365 Passwords Are Not Set to Expire' ; LicenseLevel = 'E3 L1'; Controlv8 = '5.2' ; IGGroup = '1' ; Result = '' } 
-    [PSCustomObject]@{Configuration = 'Ensure Administrative accounts are separate and cloud-only' ; LicenseLevel = 'E3 L1'; Controlv8 = '5.4' ; IGGroup = '1' ; Result = '' } 
+    [PSCustomObject]@{Configuration = 'Ensure Security Defaults is disabled on Azure Active Directory' ; LicenseLevel = 'E3 L1'; Controlv8 = '4.8' ; IGGroup = '2' ; Result = ''  ; ExpectedValue = '' ; Status = ''} 
+    [PSCustomObject]@{Configuration = 'Ensure that only organizationally managed/approved public groups exist' ; LicenseLevel = 'E3 L2'; Controlv8 = '3.3' ; IGGroup = '1' ; Result = ''  ; ExpectedValue = '' ; Status = ''} 
+    [PSCustomObject]@{Configuration = 'Ensure that collaboration invitations are sent to allowed domains only' ; LicenseLevel = 'E3 L2'; Controlv8 = '6.1' ; IGGroup = '1' ; Result = ''  ; ExpectedValue = '' ; Status = ''} 
+    [PSCustomObject]@{Configuration = 'Ensure that LinkedIn contact synchronization is disabled' ; LicenseLevel = 'E3 L2'; Controlv8 = '4.8' ; IGGroup = '2' ; Result = '2'  ; ExpectedValue = '' ; Status = ''} 
+    [PSCustomObject]@{Configuration = 'Ensure Sign-in frequency is enabled and browser sessions are not persistent for Administrative users' ; LicenseLevel = 'E3 L1'; Controlv8 = '4.3' ; IGGroup = '1' ; Result = ''  ; ExpectedValue = '' ; Status = ''} 
+    [PSCustomObject]@{Configuration = 'Ensure the option to remain signed in is hidden' ; LicenseLevel = 'E3 L2'; Controlv8 = '16.3' ; IGGroup = '2' ; Result = ''  ; ExpectedValue = '' ; Status = ''} 
+    [PSCustomObject]@{Configuration = 'Ensure modern authentication for Exchange Online is enabled' ; LicenseLevel = 'E3 L1'; Controlv8 = '3.10' ; IGGroup = '2' ; Result = ''  ; ExpectedValue = '' ; Status = ''} 
+    [PSCustomObject]@{Configuration = 'Ensure modern authentication for SharePoint applications is required' ; LicenseLevel = 'E3 L1'; Controlv8 = '3.10' ; IGGroup = '2' ; Result = ''  ; ExpectedValue = '' ; Status = ''} 
+    [PSCustomObject]@{Configuration = 'Ensure that Office 365 Passwords Are Not Set to Expire' ; LicenseLevel = 'E3 L1'; Controlv8 = '5.2' ; IGGroup = '1' ; Result = ''  ; ExpectedValue = '' ; Status = ''} 
+    [PSCustomObject]@{Configuration = 'Ensure Administrative accounts are separate and cloud-only' ; LicenseLevel = 'E3 L1'; Controlv8 = '5.4' ; IGGroup = '1' ; Result = ''  ; ExpectedValue = '' ; Status = ''} 
 )
 
 # Starting the CIS Framework Analyser
