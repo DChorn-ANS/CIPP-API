@@ -14,7 +14,7 @@ try {
 foreach ($EligibleSchedule in $eligbleschedules){
     $Expiration = if($null -eq $EligibleSchedule.scheduleInfo.expiration.endDateTime){"Permanent"}else{Get-Date $EligibleSchedule.scheduleInfo.expiration.endDateTime -format g}
 $object = [PSCustomObject]@{
-    scheduleID = $EligibleSchedule.id
+    ID = $EligibleSchedule.id
     principalId = $EligibleSchedule.principalID
     roleDefinitionId = $EligibleSchedule.roleDefinitionId
     roleDisplayName = $EligibleSchedule.roleDefinition.displayName
@@ -31,7 +31,7 @@ $object = [PSCustomObject]@{
     foreach ($Assignmentschedule in $Assignmentschedules){
         $Expiration = if($null -eq $Assignmentschedule.scheduleInfo.expiration.endDateTime){"Permanent"}else{Get-Date $Assignmentschedule.scheduleInfo.expiration.endDateTime -format g}
         $object = [PSCustomObject]@{
-            scheduleID = $Assignmentschedule.id
+            ID = $Assignmentschedule.id
             principalId = $Assignmentschedule.principalID
             roleDefinitionId = $Assignmentschedule.roleDefinitionId
             roleDisplayName = $Assignmentschedule.roleDefinition.displayName
