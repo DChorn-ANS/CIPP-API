@@ -19,26 +19,40 @@ if ($TenantFilter -eq 'AllTenants') {
         Licenses = 'Report does not support all tenants'
     }
 }
+
+#Data Fetching
+$StaleDate = (get-date).AddDays(-30)
+$StaleUsers = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/users?`$filter=accountEnabled eq true and assignedLicenses/`$count ne 0&`$count=true &`$select=displayName,userPrincipalName,signInActivity" -tenantid $TenantFilter -ComplexFilter
+$OutlookActivity = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/reports/getEmailActivityUserDetail(period='D30')" -tenantid $TenantFilter | convertfrom-csv
+$OnedriveActivity = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/reports/getOneDriveActivityUserDetail(period='D30')" -tenantid $TenantFilter | convertfrom-csv
+$SharepointActivity = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/reports/getEmailActivityUserDetail(period='D30')" -tenantid $TenantFilter | convertfrom-csv
+$TeamsActivity = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/reports/getTeamsUserActivityUserDetail(period='D30')" -tenantid $TenantFilter | convertfrom-csv
+
 #Stale Licensed Users List
-try {
-    $StaleDate = (get-date).AddDays(-30)
-    $StaleUsers = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/users?`$filter=accountEnabled eq true and assignedLicenses/`$count ne 0&`$count=true &`$select=displayName,userPrincipalName,signInActivity" -tenantid $TenantFilter -ComplexFilter
-    $AllStaleUsers = @()
-    foreach ($StaleUser in $StaleUsers) {
-        $StaleUserObject = 
-        [PSCustomObject]@{
-            DisplayName    = $StaleUser.displayName
-            UPN            = $StaleUser.userPrincipalName
-            lastSignInDate = $StaleUser.signInActivity.lastSignInDateTime
-        }
-        if ($null -ne $StaleUserObject.lastSignInDate){
-            if((get-date $StaleUserObject.lastSignInDate) -le $StaleDate){$AllStaleUsers += $StaleUserObject}
-        }else{$AllStaleUsers += $StaleUserObject}
+$AllStaleUsers = @()
+foreach ($StaleUser in $StaleUsers) {
+    $TeamsMessages = $TeamsActivity | Where-Object 'User Principal Name' -eq $StaleUser.userPrincipalName | Select-Object 'Team Chat Message Count'
+    $PrivateMessages = $TeamsActivity | Where-Object 'User Principal Name' -eq $StaleUser.userPrincipalName | Select-Object 'Private Chat Message Count'
+    $StaleUserObject = 
+    [PSCustomObject]@{
+        DisplayName    = $StaleUser.displayName
+        UPN            = $StaleUser.userPrincipalName
+        lastSignInDate = $StaleUser.signInActivity.lastSignInDateTime
+        OutlookActivity = $OutlookActivity | Where-Object 'User Principal Name' -eq $StaleUser.userPrincipalName | Select-Object 'Last Activity Date'
+        EmailsSent = $OutlookActivity | Where-Object 'User Principal Name' -eq $StaleUser.userPrincipalName | Select-Object 'Send Count'
+        OnedriveActivity = $OnedriveActivity | Where-Object 'User Principal Name' -eq $StaleUser.userPrincipalName | Select-Object 'Last Activity Date'
+        ODViewedFileCount = $OnedriveActivity | Where-Object 'User Principal Name' -eq $StaleUser.userPrincipalName | Select-Object 'Viewed or Edited File Count'
+        SharepointActivity = $SharepointActivity | Where-Object 'User Principal Name' -eq $StaleUser.userPrincipalName | Select-Object 'Last Activity Date'
+        SPViewedFileCount = $SharepointActivity | Where-Object 'User Principal Name' -eq $StaleUser.userPrincipalName | Select-Object 'Viewed or Edited File Count'
+        TeamsActivity = $TeamsActivity | Where-Object 'User Principal Name' -eq $StaleUser.userPrincipalName | Select-Object 'Last Activity Date'
+        MessageCount = [int]$TeamsMessages + [int]$PrivateMessages 
+    }
+    if ($null -ne $StaleUserObject.lastSignInDate) {
+        if ((get-date $StaleUserObject.lastSignInDate) -le $StaleDate) { $AllStaleUsers += $StaleUserObject }
+    }
+    else { $AllStaleUsers += $StaleUserObject }
 }
-}
-catch {
-    Write-LogMessage -API 'StaleUserAudit' -tenant $Tenantfilter -message "Stale User List on $($Tenantfilter). Error: $($_.exception.message)" -sev 'Error' 
-}
+
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
         Body       = @($AllStaleUsers)
