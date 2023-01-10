@@ -22,7 +22,12 @@ if ($TenantFilter -eq 'AllTenants') {
 
 #Data Fetching
 $StaleDate = (get-date).AddDays(-30)
-$StaleUsers = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/users?`$filter=accountEnabled eq true and assignedLicenses/`$count ne 0&`$count=true &`$select=displayName,userPrincipalName,signInActivity" -tenantid $TenantFilter -ComplexFilter
+$StaleUsers = 
+ try{
+    New-GraphGetRequest -uri "https://graph.microsoft.com/beta/users?`$filter=accountEnabled eq true and assignedLicenses/`$count ne 0&`$count=true &`$select=displayName,userPrincipalName,signInActivity" -tenantid $TenantFilter -ComplexFilter
+ }catch{
+    New-GraphGetRequest -uri "https://graph.microsoft.com/beta/users?`$filter=accountEnabled eq true and assignedLicenses/`$count ne 0&`$count=true &`$select=displayName,userPrincipalName" -tenantid $TenantFilter -ComplexFilter
+ }
 $OutlookActivity = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/reports/getEmailActivityUserDetail(period='D30')" -tenantid $TenantFilter | convertfrom-csv
 $OnedriveActivity = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/reports/getOneDriveActivityUserDetail(period='D30')" -tenantid $TenantFilter | convertfrom-csv
 $SharepointActivity = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/reports/getSharepointActivityUserDetail(period='D30')" -tenantid $TenantFilter | convertfrom-csv
