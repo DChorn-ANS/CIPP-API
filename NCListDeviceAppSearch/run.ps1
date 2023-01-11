@@ -10,29 +10,32 @@ Write-Host 'PowerShell HTTP trigger function processed a request.'
 $ClientID = $Request.Query.ClientID
 $AppName = $Request.Query.AppName
 
-New-NCentralConnection -ServerFQDN "$ENV:NCSite" -JWT "$ENV:NCJWTTOKEN"
-if (($null -ne $ClientID) -and ($null -ne $AppName)){
-$devicelist = Get-NCDeviceList -CustomerIDs $ClientID | Select-Object deviceid
-$alldevicesdetails = Get-NCDeviceObject -DeviceIDs $devicelist.deviceid
-$SpecificAppSearch = @()
-foreach ($Device in $alldevicesdetails) {
-    if ($device.application.displayname -match $AppName) {
-        foreach ($application in $device.application) {
-            if ($application.displayname -match $AppName) {
-                $DeviceObj = [PSCustomObject]@{
-                    'Customer name'     = $device.customer.customername
-                    'Device name'       = $device.longname
-                    'Application'       = $application.displayname
-                    'Version'           = $application.version
-                    'Publisher'         = $application.publisher
-                    'Installation Date' = $application.installationdate | out-string
+if (($null -ne $ClientID) -and ($null -ne $AppName)) {
+
+    New-NCentralConnection -ServerFQDN "$ENV:NCSite" -JWT "$ENV:NCJWTTOKEN"
+
+    $devicelist = Get-NCDeviceList -CustomerIDs $ClientID | Select-Object deviceid
+    $alldevicesdetails = Get-NCDeviceObject -DeviceIDs $devicelist.deviceid
+    $SpecificAppSearch = @()
+    foreach ($Device in $alldevicesdetails) {
+        if ($device.application.displayname -match $AppName) {
+            foreach ($application in $device.application) {
+                if ($application.displayname -match $AppName) {
+                    $DeviceObj = [PSCustomObject]@{
+                        'Customer name'     = $device.customer.customername
+                        'Device name'       = $device.longname
+                        'Application'       = $application.displayname
+                        'Version'           = $application.version
+                        'Publisher'         = $application.publisher
+                        'Installation Date' = $application.installationdate | out-string
+                    }
+                    $SpecificAppSearch += $DeviceObj
                 }
-                $SpecificAppSearch += $DeviceObj
             }
         }
     }
 }
-} else {$SpecificAppSearch = "Missing Parameters"}
+else { $SpecificAppSearch = "Missing Parameters" }
 
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
