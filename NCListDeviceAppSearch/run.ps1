@@ -11,7 +11,7 @@ $ClientID = $Request.Query.ClientID
 $AppName = $Request.Query.AppName
 
 New-NCentralConnection -ServerFQDN "$ENV:NCSite" -JWT "$ENV:NCJWTTOKEN"
-
+if (($null -ne $ClientID) -and ($null -ne $AppName)){
 $devicelist = Get-NCDeviceList -CustomerIDs $ClientID | Select-Object deviceid
 $alldevicesdetails = Get-NCDeviceObject -DeviceIDs $devicelist.deviceid
 $SpecificAppSearch = @()
@@ -32,6 +32,7 @@ foreach ($Device in $alldevicesdetails) {
         }
     }
 }
+} else {$SpecificAppSearch = "Missing Parameters"}
 
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
