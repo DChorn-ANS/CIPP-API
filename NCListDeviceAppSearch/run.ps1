@@ -35,7 +35,6 @@ if (($null -ne $ClientID) -and ($null -ne $AppName)) {
         }
     }
 }
-else { $SpecificAppSearch = "Missing Parameters" }
 
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
