@@ -124,8 +124,8 @@ if (($null -ne $ClientID) -and ($null -ne $AppName)) {
             foreach ($application in $device.applications) {
                 if ($application.displayname -match $AppName) {
                     [PSCustomObject]@{
-                        'Customer name' = $device.customer.customername
-                        'Device name'   = $device.longname
+                        'Customer name' = $device.customername
+                        'Device name'   = $device.devicename
                         'Application'   = $application.displayname
                         'Version'       = $application.version
                         'Publisher'     = $application.publisher
