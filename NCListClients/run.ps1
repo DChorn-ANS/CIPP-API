@@ -11,7 +11,6 @@ $Table = Get-CIPPTable -TableName cacheNCclients
 $Rows = Get-AzDataTableEntity @Table | Where-Object -Property Timestamp -GT (Get-Date).AddHours(-8)
 if (!$Rows) {
 
-
 	$MySoapRequest = (@"
 <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ei2="http://ei2.nobj.nable.com/">
 	<soap:Header/>
@@ -43,7 +42,7 @@ if (!$Rows) {
 
 	[int]$max = $Names.count
 	$CustomerList = for ($i = 0; $i -lt $max; $i ++) {
-		[pscustomobject]@{
+		@{
 			customername = $Names[$i]
 			customerid   = $IDs[$i]
 			PartitionKey = "NCclients"
