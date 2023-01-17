@@ -49,6 +49,7 @@ if (!$Rows) {
 			RowKey       = $IDs[$i]
 		}
 	}
+	$Table.Force = $true
 	Add-AzDataTableEntity @Table -Entity $CustomerList -Force | Out-Null
 }         
 else {
