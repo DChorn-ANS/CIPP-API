@@ -46,6 +46,8 @@ if (!$Rows) {
 		[pscustomobject]@{
 			customername = $Names[$i]
 			customerid   = $IDs[$i]
+			PartitionKey = "NCclients"
+			RowKey       = "Clients"
 		}
 	}
 	Add-AzDataTableEntity @Table -Entity $CustomerList -Force | Out-Null
