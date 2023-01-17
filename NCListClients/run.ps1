@@ -47,7 +47,7 @@ if (!$Rows) {
 			customername = $Names[$i]
 			customerid   = $IDs[$i]
 			PartitionKey = "NCclients"
-			RowKey       = "Clients"
+			RowKey       = $IDs[$i]
 		}
 	}
 	Add-AzDataTableEntity @Table -Entity $CustomerList -Force | Out-Null
