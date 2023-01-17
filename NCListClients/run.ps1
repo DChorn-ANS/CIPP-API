@@ -42,10 +42,10 @@ $IDs = $FullResponse.Envelope.body.customerListChildrenResponse.return.items | w
 [int]$max = $Names.count
 $CustomerList = for ($i = 0; $i -lt $max; $i ++) {
 	@{
-		customername = $Names[$i]
-		customerid   = $IDs[$i]
+		customername = "$Names[$i]"
+		customerid   = "$IDs[$i]"
 		PartitionKey = "NCclients"
-		RowKey       = $IDs[$i]
+		RowKey       = "$IDs[$i]"
 	}
 }
 try {
