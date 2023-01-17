@@ -48,7 +48,10 @@ $CustomerList = for ($i = 0; $i -lt $max; $i ++) {
 		RowKey       = $IDs[$i]
 	}
 }
-Add-AzDataTableEntity @Table -Entity $CustomerList -Force
+try {
+	Add-AzDataTableEntity @Table -Entity $CustomerList -Force
+}
+catch { $CustomerList = $_ }
 
 
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
