@@ -11,7 +11,12 @@ Write-LogMessage -API 'NCApp' -tenant $tenant -message "Started N-Central App Ca
 
 $Batch = (Invoke-ActivityFunction -FunctionName 'NCApp_GetQueue' -Input 'LetsGo')
 $ParallelTasks = foreach ($Item in $Batch) {
-  Invoke-DurableActivity -FunctionName 'NCApp_Cache' -Input $item -NoWait -RetryOptions $RetryOptions
+  try {
+    Invoke-DurableActivity -FunctionName 'NCApp_Cache' -Input $item -NoWait -RetryOptions $RetryOptions
+  }
+  catch {
+    Write-LogMessage -API 'NCApp' -tenant $tenant -message "N-Central App Cache task for $item failed: $($_.Exception.Message)" -sev error
+  }
 }
 
 $TableParams = Get-CippTable -tablename 'cacheNCdeviceapps'
@@ -23,7 +28,7 @@ if ($TableParams) {
     Invoke-ActivityFunction -FunctionName 'Activity_AddOrUpdateTableRows' -Input $TableParams
   }
   catch {
-    Write-LogMessage -API 'NCApp' -tenant $tenant -message "N-Centrol App Cache could not write to table: $($_.Exception.Message)" -sev error
+    Write-LogMessage -API 'NCApp' -tenant $tenant -message "N-Central App Cache could not write to table: $($_.Exception.Message)" -sev error
   }
 }
 else {
