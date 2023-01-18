@@ -8,7 +8,7 @@ Write-Host 'PowerShell HTTP trigger function processed a request.'
 
 # Interact with query parameters or the body of the request.
 $Table = Get-CIPPTable -TableName cacheNCclients
-$Rows = Get-AzDataTableEntity @Table | Where-Object -Property Timestamp -GT (Get-Date).AddHours(-8)
+$Rows = Get-AzDataTableEntity @Table | Where-Object -Property Timestamp -GT (Get-Date).AddDays(-7)
 if (!$Rows) {
 
 	$MySoapRequest = (@"
