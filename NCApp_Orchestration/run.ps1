@@ -11,12 +11,7 @@ Write-LogMessage -API 'NCApp' -tenant $tenant -message "Started N-Central App Ca
 
 $Batch = (Invoke-ActivityFunction -FunctionName 'NCApp_GetQueue' -Input 'LetsGo')
 $ParallelTasks = foreach ($Item in $Batch) {
-  try {
-    Invoke-DurableActivity -FunctionName 'NCApp_Cache' -Input $item -NoWait -RetryOptions $RetryOptions
-  }
-  catch {
-    Write-LogMessage -API 'NCApp' -tenant $tenant -message "N-Central App Cache task for $item failed: $($_.Exception.Message)" -sev error
-  }
+  Invoke-DurableActivity -FunctionName 'NCApp_Cache' -Input $item -NoWait -RetryOptions $RetryOptions
 }
 
 $TableParams = Get-CippTable -tablename 'cacheNCdeviceapps'
