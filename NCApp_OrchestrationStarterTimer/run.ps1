@@ -1,32 +1,16 @@
-param($Context)
+param($Timer)
 
-
-$DurableRetryOptions = @{
-    FirstRetryInterval  = (New-TimeSpan -Seconds 5)
-    MaxNumberOfAttempts = 3
-    BackoffCoefficient  = 2
-}
-$RetryOptions = New-DurableRetryOptions @DurableRetryOptions
-Write-LogMessage -API 'NCApp' -tenant $tenant -message "Started N-Central App Cache" -sev info
-
-$Batch = (Invoke-ActivityFunction -FunctionName 'NCApp_GetQueue' -Input 'LetsGo')
-$ParallelTasks = foreach ($Item in $Batch) {
-    Invoke-DurableActivity -FunctionName 'NCApp_Cache' -Input $item -NoWait -RetryOptions $RetryOptions
+if ($env:DEV_SKIP_NCAPP_TIMER) { 
+    Write-Host 'Skipping NCApp timer'
+    exit 0 
 }
 
-$TableParams = Get-CippTable -tablename 'cacheNCdeviceapps'
-$TableParams.Entity = Wait-ActivityFunction -Task $ParallelTasks
-$TableParams.Force = $true
-$TableParams = $TableParams | Where-Object -Property RowKey -NE "" | ConvertTo-Json -Compress
-if ($TableParams) {
-    try {
-        Invoke-ActivityFunction -FunctionName 'Activity_AddOrUpdateTableRows' -Input $TableParams
-    }
-    catch {
-        Write-LogMessage -API 'NCApp' -tenant $tenant -message "N-Centrol App Cache could not write to table: $($_.Exception.Message)" -sev error
-    }
+try {
+        $InstanceId = Start-NewOrchestration -FunctionName 'BestPracticeAnalyser_Orchestration'
+        Write-Host "Started orchestration with ID = '$InstanceId'"
+        $Orchestrator = New-OrchestrationCheckStatusResponse -Request $Timer -InstanceId $InstanceId
+        Write-LogMessage -API 'NCAppCache' -message 'Started retrieving N-Central App Cache' -sev Info
+        $Results = [pscustomobject]@{'Results' = 'Started running analysis' }
+    Write-Host ($Orchestrator | ConvertTo-Json)
 }
-else {
-    Write-LogMessage -API 'NCApp' -tenant $tenant -message "Tried writing empty values to N-Centrol App Cache" -sev Info
-}
-Write-LogMessage -API 'NCApp' -tenant $tenant -message 'N-Centrol App Cache has Finished' -sev Info
+catch { Write-Host "NCApp_OrchestratorStarterTimer Exception $($_.Exception.Message)" }
