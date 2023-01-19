@@ -1,22 +1,9 @@
 ﻿{
   "bindings": [
     {
-      "authLevel": "anonymous",
-      "type": "httpTrigger",
+      "name": "CustomerID",
       "direction": "in",
-      "name": "Request",
-      "methods": ["get", "post"]
-    },
-    {
-      "type": "http",
-      "direction": "out",
-      "name": "Response"
-    },
-    {
-      "type": "queue",
-      "direction": "out",
-      "name": "Msg",
-      "queueName": "licqueue"
+      "type": "activityTrigger"
     }
   ]
 }
