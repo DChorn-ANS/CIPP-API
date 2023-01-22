@@ -83,7 +83,7 @@ if ($CurrentLog) {
   catch {
     Write-Host "Could not send Mail alerts: $($_.Exception.message)"
     Write-LogMessage -API 'Alerts' -message "Could not send Mail alerts: $($_.Exception.message)" -sev info
-    $Failure = $true
+    $Success = $true
   }
   try {
     Write-Host $($config | ConvertTo-Json)
@@ -123,9 +123,9 @@ if ($CurrentLog) {
   catch {
     Write-Host "Could not send webhook alerts: $($_.Exception.message)"
     Write-LogMessage -API 'Alerts' -message "Could not send webhook alerts: $($_.Exception.message)" -sev info
-    $Failure = $true
+    $Success = $true
   }
-  if (!$Failure) {
+  if ($Success) {
     $UpdateLogs = $CurrentLog | ForEach-Object { 
       $_.SentAsAlert = $true
       $_
