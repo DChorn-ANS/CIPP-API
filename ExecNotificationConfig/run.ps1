@@ -19,8 +19,7 @@ $results = try {
         'email'        = "$($Request.Body.Email)"
         'adminEmail'   = "$($Request.Body.adminEmail)"
         'webhook'      = "$($Request.Body.Webhook)"
-        'onePerTenant' = [boolean]$Request.Body.onePerTenant
-        'onePerAlert'  = [boolean]$Request.Body.onePerAlert
+        'alerting'     = "$($Request.Body.alerting)"
         'PartitionKey' = 'CippNotifications'
         'RowKey'       = 'CippNotifications'
     }
@@ -28,7 +27,7 @@ $results = try {
         $SchedulerConfig[([pscustomobject]$logvalue.value)] = $true 
     }
 
-    
+
     Add-AzDataTableEntity @Table -Entity $SchedulerConfig -Force | Out-Null
     'Successfully set the configuration'
 }
