@@ -12,25 +12,23 @@ Write-Host 'PowerShell HTTP trigger function processed a request.'
 $results = try { 
     $Table = Get-CIPPTable -TableName SchedulerConfig
     $SchedulerConfig = @{
-        'tenant'             = 'Any'
-        'tenantid'           = 'TenantId'
-        'type'               = 'CIPPNotifications'
-        'schedule'           = 'Every 15 minutes'
-        'email'              = "$($Request.Body.Email)"
-        'webhook'            = "$($Request.Body.Webhook)"
-        'removeStandard'     = [boolean]$Request.Body.removeStandard
-        'addStandardsDeploy' = [boolean]$Request.Body.addStandardsDeploy
-        'tokenUpdater'       = [boolean]$Request.Body.tokenUpdater
-        'addPolicy'          = [boolean]$Request.Body.addPolicy
-        'removeUser'         = [boolean]$Request.Body.removeUser
-        'addUser'            = [boolean]$Request.Body.addUser
-        'addChocoApp'        = [boolean]$Request.Body.addChocoApp
-        'onePerTenant'       = [boolean]$Request.Body.onePerTenant
-        'onePerAlert'        = [boolean]$Request.Body.onePerAlert
-        'PartitionKey'       = 'CippNotifications'
-        'RowKey'             = 'CippNotifications'
+        'tenant'       = 'Any'
+        'tenantid'     = 'TenantId'
+        'type'         = 'CIPPNotifications'
+        'schedule'     = 'Every 15 minutes'
+        'email'        = "$($Request.Body.Email)"
+        'adminEmail'   = "$($Request.Body.adminEmail)"
+        'webhook'      = "$($Request.Body.Webhook)"
+        'onePerTenant' = [boolean]$Request.Body.onePerTenant
+        'onePerAlert'  = [boolean]$Request.Body.onePerAlert
+        'PartitionKey' = 'CippNotifications'
+        'RowKey'       = 'CippNotifications'
+    }
+    foreach ($logvalue in [pscustomobject]$Request.body.logsToInclude) {
+        $SchedulerConfig[([pscustomobject]$logvalue.value)] = $true 
     }
 
+    
     Add-AzDataTableEntity @Table -Entity $SchedulerConfig -Force | Out-Null
     'Successfully set the configuration'
 }
