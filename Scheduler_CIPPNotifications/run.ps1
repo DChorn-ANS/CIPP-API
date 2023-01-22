@@ -8,15 +8,16 @@ $Config = [pscustomobject](Get-AzDataTableEntity @Table -Filter $Filter)
 if ($config.seperateAlertTypes) {
   #Run Log Alerting
   if ($config.adminEmail -like '*@*') {
-    try {
-      $Settings = $Config.psobject.properties.name
-      $Table = Get-CIPPTable
-      $PartitionKey = Get-Date -UFormat '%Y%m%d'
-      $Filter = "PartitionKey eq '{0}'" -f $PartitionKey
-      $Currentlog = Get-AzDataTableEntity @Table -Filter $Filter | Where-Object { $_.API -In $Settings -and $_.SentAsAlert -ne $true }
 
-      $HTMLLog = ($CurrentLog | Select-Object Message, API, Tenant, Username, Severity | ConvertTo-Html -frag) -replace '<table>', '<table class=blueTable>' | Out-String
-      $JSONBody = @"
+    $Settings = $Config.psobject.properties.name
+    $Table = Get-CIPPTable
+    $PartitionKey = Get-Date -UFormat '%Y%m%d'
+    $Filter = "PartitionKey eq '{0}'" -f $PartitionKey
+    $Currentlog = Get-AzDataTableEntity @Table -Filter $Filter | Where-Object { $_.API -In $Settings -and $_.SentAsAlert -ne $true }
+    if ($Currentlog) {
+      try {
+        $HTMLLog = ($CurrentLog | Select-Object Message, API, Tenant, Username, Severity | ConvertTo-Html -frag) -replace '<table>', '<table class=blueTable>' | Out-String
+        $JSONBody = @"
               {
                   "message": {
                     "subject": "CIPP Alert: Alerts found starting at $((Get-Date).AddMinutes(-15))",
@@ -40,22 +41,23 @@ if ($config.seperateAlertTypes) {
                   "saveToSentItems": "false"
                 }
 "@
-      New-GraphPostRequest -uri 'https://graph.microsoft.com/v1.0/me/sendMail' -tenantid $env:TenantID -type POST -body ($JSONBody)
-      $Success = $true
-    }
-    catch {
-      Write-Host "Could not send Mail alerts: $($_.Exception.message)"
-      Write-LogMessage -API 'Alerts' -message "Could not send Mail Log alerts: $($_.Exception.message)" -sev info
-    }
-    if ($Success) {
-      $UpdateLogs = $CurrentLog | ForEach-Object { 
-        $_.SentAsAlert = $true
-        $_
+        New-GraphPostRequest -uri 'https://graph.microsoft.com/v1.0/me/sendMail' -tenantid $env:TenantID -type POST -body ($JSONBody)
+        $Success = $true
       }
-      if ($UpdateLogs) {
-        Add-AzDataTableEntity @Table -Entity $UpdateLogs -Force
+      catch {
+        Write-Host "Could not send Mail alerts: $($_.Exception.message)"
+        Write-LogMessage -API 'Alerts' -message "Could not send Mail Log alerts: $($_.Exception.message)" -sev info
       }
-      $Success = $null
+      if ($Success) {
+        $UpdateLogs = $CurrentLog | ForEach-Object { 
+          $_.SentAsAlert = $true
+          $_
+        }
+        if ($UpdateLogs) {
+          Add-AzDataTableEntity @Table -Entity $UpdateLogs -Force
+        }
+        $Success = $null
+      }
     }
   }
   #Run Alert Logging
