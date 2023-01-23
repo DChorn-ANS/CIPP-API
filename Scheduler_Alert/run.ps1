@@ -162,7 +162,9 @@ try {
                     #foreach ($sku in $skuid) {
                         if ($_.skuId -in $ExcludedSkuList.GUID) { continue }
                         #$PrettyName = ($ConvertTable | Where-Object { $_.GUID -eq $_.skuid }).'Product_Display_Name' | Select-Object -Last 1
-                        if (!$PrettyName) { $PrettyName = $_.skuPartNumber }
+                        #if (!$PrettyName) { 
+                            $PrettyName = $_.skuPartNumber 
+                        #}
                         if ($_.prepaidUnits.enabled - $_.consumedUnits -gt 0) {
                             "$PrettyName has unused licenses. Using $($_.consumedUnits) of $($_.prepaidUnits.enabled)."
                         }
@@ -181,9 +183,11 @@ try {
                 New-GraphGetRequest -uri 'https://graph.microsoft.com/beta/subscribedSkus' -tenantid $Tenant.tenant | ForEach-Object {
                     #$skuid = $_
                     #foreach ($sku in $skuid) {
-                        if ($_.skuId -in $_.GUID) { continue }
+                        if ($_.skuId -in $ExcludedSkuList.GUID) { continue }
                         #$PrettyName = ($ConvertTable | Where-Object { $_.GUID -eq $sku.skuid }).'Product_Display_Name' | Select-Object -Last 1
-                        if (!$PrettyName) { $PrettyName = $_.skuPartNumber }
+                        #if (!$PrettyName) { 
+                            $PrettyName = $_.skuPartNumber 
+                        #}
                         if ($_.prepaidUnits.enabled - $_.consumedUnits -lt 0) {
                             "$PrettyName has Overused licenses. Using $($_.consumedUnits) of $($_.prepaidUnits.enabled)."
                         }
