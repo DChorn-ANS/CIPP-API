@@ -25,5 +25,5 @@ $object = foreach ($Tenant in $Tenants) {
         }
     }
 }
-
+Write-LogMessage -API 'Scheduler' -tenant $tenant -message 'Scheduler Get Queue Ran.' -sev Debug
 $object
