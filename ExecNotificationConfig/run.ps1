@@ -12,17 +12,15 @@ Write-Host 'PowerShell HTTP trigger function processed a request.'
 $results = try { 
     $Table = Get-CIPPTable -TableName SchedulerConfig
     $SchedulerConfig = @{
-        'tenant'         = 'Any'
-        'tenantid'       = 'TenantId'
-        'type'           = 'CIPPNotifications'
-        'schedule'       = 'Every 15 minutes'
-        'email'          = "$($Request.Body.Email)"
-        'seperateAlertTypes' = "$($Request.Body.seperateAlertTypes)"
-        'adminEmail'     = "$($Request.Body.adminEmail)"
-        'webhook'        = "$($Request.Body.Webhook)"
-        'alerting'       = "$($Request.Body.alerting)"
-        'PartitionKey'   = 'CippNotifications'
-        'RowKey'         = 'CippNotifications'
+        'tenant'       = 'Any'
+        'tenantid'     = 'TenantId'
+        'type'         = 'CIPPNotifications'
+        'schedule'     = 'Every 15 minutes'
+        'email'        = "$($Request.Body.Email)"
+        'webhook'      = "$($Request.Body.Webhook)"
+        'onePerTenant' = [boolean]$Request.Body.onePerTenant
+        'PartitionKey' = 'CippNotifications'
+        'RowKey'       = 'CippNotifications'
     }
     foreach ($logvalue in [pscustomobject]$Request.body.logsToInclude) {
         $SchedulerConfig[([pscustomobject]$logvalue.value)] = $true 
