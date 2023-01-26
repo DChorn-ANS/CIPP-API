@@ -19,5 +19,5 @@ else {
 
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [httpstatusCode]::OK
-        Body       = $body
+        Body       = @($body)
     })
