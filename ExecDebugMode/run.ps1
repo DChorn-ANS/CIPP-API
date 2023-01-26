@@ -27,10 +27,10 @@ if ($request.Query.setDebugMode -and $request.Query.setDebugMode -ne $ENV:DebugM
 
 
 if ($env:DebugMode -eq $true) {
-    $Body = [pscustomobject]@{'CurrentState' = $true }
+    $Body = [pscustomobject]@{'setDebugMode' = $true }
 }
 else {
-    $Body = [pscustomobject]@{'CurrentState' = $false }
+    $Body = [pscustomobject]@{'setDebugMode' = $false }
 }
 
 
