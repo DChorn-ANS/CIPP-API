@@ -26,15 +26,7 @@ if ($request.Query.setDebugMode -and $request.Query.setDebugMode -ne $ENV:DebugM
 }
 
 
-if ($env:DebugMode -eq $true) {
-    $Body = [pscustomobject]@{'setDebugMode' = $true }
-}
-else {
-    $Body = [pscustomobject]@{'setDebugMode' = $false }
-}
-
-
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [httpstatusCode]::OK
-        Body       = $body
+        Body       = 'Results' = 'Missing Parameter or no change in property'
     })
