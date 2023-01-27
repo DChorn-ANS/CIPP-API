@@ -9,11 +9,12 @@ Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME  -
 
 # Write to the Azure Functions log stream.
 Write-Host "PowerShell HTTP trigger function processed a request."
-
+$Period = $Request.Query.period
+if (!$Period) $Period = 7
 # Interact with query parameters or the body of the request.
 $TenantFilter = $Request.Query.TenantFilter
 try {
-    $GraphRequest = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/reports/getMailboxUsageDetail(period='D7')" -tenantid $TenantFilter | ConvertFrom-Csv | Select-Object @{ Name = 'UPN'; Expression = { $_.'User Principal Name' } },
+    $GraphRequest = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/reports/getMailboxUsageDetail(period='D$Period')" -tenantid $TenantFilter | ConvertFrom-Csv | Select-Object @{ Name = 'UPN'; Expression = { $_.'User Principal Name' } },
     @{ Name = 'displayName'; Expression = { $_.'Display Name' } },
     @{ Name = 'LastActive'; Expression = { $_.'Last Activity Date' } },
     @{ Name = 'UsedGB'; Expression = { [math]::round($_.'Storage Used (Byte)' / 1GB, 0) } },

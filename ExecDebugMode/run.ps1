@@ -25,8 +25,8 @@ if ($($request.Query.setDebugMode)) {
     exit
 }
 
-
+$Body = [pscustomobject]@{'Results' = "Unable to change debug to $($request.Query.value), debug is still $($env:DebugMode)" }
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [httpstatusCode]::OK
-        Body       = [pscustomobject]@{'Results' = "Unable to change debug to $($request.Query), debug is still $($env:DebugMode)" }
+        Body       = $Body
     })

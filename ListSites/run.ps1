@@ -14,8 +14,10 @@ Write-Host "PowerShell HTTP trigger function processed a request."
 $TenantFilter = $Request.Query.TenantFilter
 $type = $request.query.Type
 $UserUPN = $request.query.UserUPN
+$Period = $Request.Query.period
+if (!$Period) $Period = 7
 try {
-    $Result = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/reports/get$($type)Detail(period='D7')" -tenantid $TenantFilter | ConvertFrom-Csv 
+    $Result = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/reports/get$($type)Detail(period='D$Period')" -tenantid $TenantFilter | ConvertFrom-Csv 
 
     if ($UserUPN) {
         $ParsedRequest = $Result |  Where-Object { $_.'Owner Principal Name' -eq $UserUPN }
