@@ -8,10 +8,10 @@ $APIName = $TriggerMetadata.FunctionName
 Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME -message 'Accessed this API' -Sev 'Debug'
 
 # Set Debug
-if ($($request.Query.setDebugMode)) {
+if ($($request.body.setDebugMode)) {
     Try {
         Update-AZFunctionAppSetting -Name $($ENV:WEBSITE_SITE_NAME) -ResourceGroupName $($ENV:Website_Resource_Group) -AppSetting @{"DebugMode" = "$($request.Query.setDebugMode)" } -Force
-        $GraphRequest = [pscustomobject]@{'Results' = "Set Debug Mode to $($Request.Query.setDebugMode)" }
+        $GraphRequest = [pscustomobject]@{'Results' = "Set Debug Mode to $($Request.body.setDebugMode)" }
         Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME -message "Set Debug Mode to $($request.Query.setDebugMode)" -Sev 'info'
     }
     catch {
@@ -25,8 +25,8 @@ if ($($request.Query.setDebugMode)) {
     exit
 }
 
-$Body = [pscustomobject]@{'Results' = "Unable to change debug to $($request.Query.value), debug is still $($env:DebugMode)" }
+
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [httpstatusCode]::OK
-        Body       = $Body
+        Body       = [pscustomobject]@{'Results' = "Unable to change debug to $($request.body.setDebugMode), debug is still $($env:DebugMode)" }
     })
