@@ -8,7 +8,7 @@ $APIName = $TriggerMetadata.FunctionName
 Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME -message 'Accessed this API' -Sev 'Debug'
 
 # Set Debug
-if ($($request.body.setDebugMode)) {
+if (null -ne $request.body.setDebugMode) {
     Try {
         Connect-AzAccount -Identity
         $Subscription = ($ENV:WEBSITE_OWNER_NAME).split('+') | Select-Object -First 1
@@ -30,5 +30,5 @@ if ($($request.body.setDebugMode)) {
 
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [httpstatusCode]::OK
-        Body       = [pscustomobject]@{'Results' = "Unable to change debug to $($request.body.setDebugMode), debug is still $($env:DebugMode)" }
+        Body       = [pscustomobject]@{'Results' = "No change selected, debug is still $($env:DebugMode)" }
     })
