@@ -10,7 +10,8 @@ Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME -m
 # Set Debug
 if ($($request.body.setDebugMode)) {
     Try {
-        Update-AZFunctionAppSetting -Name $($ENV:WEBSITE_SITE_NAME) -ResourceGroupName $($ENV:Website_Resource_Group) -AppSetting @{"DebugMode" = "$($request.Query.setDebugMode)" } -Force
+        $Subscription = ($ENV:WEBSITE_OWNER_NAME).split('+') | Select-Object -First 1
+        Update-AZFunctionAppSetting -Name $($ENV:WEBSITE_SITE_NAME) -ResourceGroupName $($ENV:Website_Resource_Group) -SubscriptionId $Subscription -AppSetting @{"DebugMode" = "$($request.Query.setDebugMode)" } -Force
         $GraphRequest = [pscustomobject]@{'Results' = "Set Debug Mode to $($Request.body.setDebugMode)" }
         Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME -message "Set Debug Mode to $($request.Query.setDebugMode)" -Sev 'info'
     }
