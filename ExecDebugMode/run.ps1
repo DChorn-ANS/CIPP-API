@@ -19,14 +19,14 @@ if ($($request.Query.setDebugMode)) {
         $GraphRequest = [pscustomobject]@{'Results' = "Failed to set Debug Mode. Error: $($_.exception.message)" }
     }
     Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
-        StatusCode = [HttpStatusCode]::OK
-        Body       = $GraphRequest
-    })
+            StatusCode = [HttpStatusCode]::OK
+            Body       = $GraphRequest
+        })
     exit
 }
 
 
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [httpstatusCode]::OK
-        Body       = [pscustomobject]@{'Results' = "Unable to change debug to $($request.Query.setDebugMode), debug is still $($env:DebugMode)"}
+        Body       = [pscustomobject]@{'Results' = "Unable to change debug to $($request.Query), debug is still $($env:DebugMode)" }
     })
