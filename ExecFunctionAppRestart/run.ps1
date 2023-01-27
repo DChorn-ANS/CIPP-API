@@ -14,6 +14,8 @@ Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [HttpStatusCode]::OK
         Body       = $GraphRequest
     })
+Start-Sleep 5
+Connect-AzAccount -Identity
 Restart-AzFunctionApp -Name $($ENV:WEBSITE_SITE_NAME) -ResourceGroupName $($ENV:Website_Resource_Group) -Force
 
 
