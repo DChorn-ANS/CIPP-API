@@ -8,7 +8,7 @@ $APIName = $TriggerMetadata.FunctionName
 Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME -message 'Accessed this API' -Sev 'Debug'
 
 # Set Debug
-if (null -ne $request.body.setDebugMode) {
+if ($null -ne $request.body.setDebugMode) {
     Try {
         Connect-AzAccount -Identity
         $Subscription = ($ENV:WEBSITE_OWNER_NAME).split('+') | Select-Object -First 1

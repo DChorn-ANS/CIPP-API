@@ -10,14 +10,14 @@ Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME -m
 # Get Debug
 
 if ($env:DebugMode -eq $true) {
-    $Body = [pscustomobject]@{'setDebugMode' = $true }
+    $Body = @{'setDebugMode' = $true }
 }
 else {
-    $Body = [pscustomobject]@{'setDebugMode' = $false }
+    $Body = @{'setDebugMode' = $false }
 }
 
 
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
         StatusCode = [httpstatusCode]::OK
-        Body       = @($body)
+        Body       = $body
     })
