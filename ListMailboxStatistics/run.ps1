@@ -13,10 +13,9 @@ Write-Host "PowerShell HTTP trigger function processed a request."
 # Interact with query parameters or the body of the request.
 $TenantFilter = $Request.Query.TenantFilter
 $reportPeriod = $Request.Query.reportPeriod
-if (!$reportPeriod) $reportPeriod = 7
+if (!$reportPeriod) { $reportPeriod = 7 }
 try {
-    $GraphRequest = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/reports/getMailboxUsageDetail(period='D$reportPeriod')" -tenantid $TenantFilter | ConvertFrom-Csv
-    $Output = $GraphRequest | Select-Object @{ Name = 'UPN'; Expression = { $_.'User Principal Name' } },
+    $GraphRequest = New-GraphGetRequest -uri "https://graph.microsoft.com/beta/reports/getMailboxUsageDetail(period='D$reportPeriod')" -tenantid $TenantFilter | ConvertFrom-Csv | Select-Object @{ Name = 'UPN'; Expression = { $_.'User Principal Name' } },
     @{ Name = 'displayName'; Expression = { $_.'Display Name' } },
     @{ Name = 'Mailbox Type'; Expression = { $_.'Recipient Type' } },
     @{ Name = 'LastActive'; Expression = { $_.'Last Activity Date' } },
