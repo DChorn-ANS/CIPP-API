@@ -6,10 +6,11 @@ param($Request, $TriggerMetadata)
 $APIName = $TriggerMetadata.FunctionName
 Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Accessed this API" -Sev "Debug"
 $Tenantfilter = $request.Query.tenantfilter
+$Function = $request.Query.function
 
 try {
-    $Policies = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-HostedContentFilterPolicy" | Select-Object * -ExcludeProperty *odata*, *data.type*
-    $RuleState = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-HostedContentFilterRule" | Select-Object * -ExcludeProperty *odata*, *data.type*
+    $Policies = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Policy" | Select-Object * -ExcludeProperty *odata*, *data.type*
+    $RuleState = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Rule" | Select-Object * -ExcludeProperty *odata*, *data.type*
     $GraphRequest = $Policies | Select-Object *, @{l = 'ruleState'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).State } }, @{l = 'rulePrio'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).Priority } }
     $StatusCode = [HttpStatusCode]::OK
 }

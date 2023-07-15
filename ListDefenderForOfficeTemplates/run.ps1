@@ -6,10 +6,11 @@ param($Request, $TriggerMetadata)
 $APIName = $TriggerMetadata.FunctionName
 Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Accessed this API" -Sev "Debug"
 $Table = Get-CippTable -tablename 'templates'
+$Function = if ($request.Query.function -eq "HostedContentFilter") { "Spamfilter" } { $Request.Query.function }
 
 #List new policies
 $Table = Get-CippTable -tablename 'templates'
-$Filter = "PartitionKey eq 'SpamfilterTemplate'" 
+$Filter = "PartitionKey eq '$($Function)Template'" 
 $Templates = (Get-AzDataTableEntity @Table -Filter $Filter) | ForEach-Object {
     $GUID = $_.RowKey
     $data = $_.JSON | ConvertFrom-Json 
