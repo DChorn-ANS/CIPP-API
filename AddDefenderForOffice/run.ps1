@@ -14,7 +14,7 @@ $Function = $Request.Body.Function
 $Tenants = ($Request.body | Select-Object Select_*).psobject.properties.value
 
 $Result = foreach ($Tenantfilter in $tenants) {
-    if ($Funtion -eq "HostedOutboundSpamFilter" ) {
+    if ($Function -eq "HostedOutboundSpamFilter" ) {
         try {
             New-ExoRequest -tenantid $Tenantfilter -cmdlet "New-$($Function)Policy" -cmdParams $RequestParams
             $Domains = (New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-AcceptedDomain").name
