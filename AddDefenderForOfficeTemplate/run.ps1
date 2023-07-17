@@ -56,7 +56,7 @@ try {
     }
     $JSON = ($JSON | Select-Object @{n = 'name'; e = { $_.name } }, @{n = 'comments'; e = { $_.comments } }, * | ConvertTo-Json -Depth 10)
     $Table = Get-CippTable -tablename 'templates'
-    if ($function = "HostedContentFilter") { $Partition = "SpamfilterTemplate" } else { $Partition = "$($Function)Template" }
+    if ($function -eq "HostedContentFilter") { $Partition = "SpamfilterTemplate" } else { $Partition = "$($Function)Template" }
     $Table.Force = $true
     Add-AzDataTableEntity @Table -Entity @{
         JSON         = "$json"
