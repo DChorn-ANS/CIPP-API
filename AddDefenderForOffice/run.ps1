@@ -14,40 +14,38 @@ $Function = $Request.Body.Function
 $Tenants = ($Request.body | Select-Object Select_*).psobject.properties.value
 
 $Result = foreach ($Tenantfilter in $tenants) {
-    switch ($Function) {
-        { $_ -eq "HostedOutboundSpamFilter" } {
-            try {
-                New-ExoRequest -tenantid $Tenantfilter -cmdlet "New-$($Function)Policy" -cmdParams $RequestParams
-                $Domains = (New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-AcceptedDomain").name
-                $ruleparams = @{
-                    "Name"               = "$($RequestParams.name)";
-                    "$($Function)Policy" = "$($RequestParams.name)";
-                    "SenderDomainIs"     = @($domains)
-                }
-                New-ExoRequest -tenantid $Tenantfilter -cmdlet "New-$($Function)Rule" -cmdParams $ruleparams
-                "Successfully created Outbound Spamfilter for $tenantfilter."
-                Write-LogMessage -API $APINAME -tenant $tenantfilter -message "Created Outbound Spamfilter for $($tenantfilter)" -sev Debug
+    if ($Funtion -eq "HostedOutboundSpamFilter" ) {
+        try {
+            New-ExoRequest -tenantid $Tenantfilter -cmdlet "New-$($Function)Policy" -cmdParams $RequestParams
+            $Domains = (New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-AcceptedDomain").name
+            $ruleparams = @{
+                "Name"               = "$($RequestParams.name)";
+                "$($Function)Policy" = "$($RequestParams.name)";
+                "SenderDomainIs"     = @($domains)
             }
-            catch {
-                "Could not create create Outbound Spamfilter for $($tenantfilter): $($_.Exception.message)"
-            }
+            New-ExoRequest -tenantid $Tenantfilter -cmdlet "New-$($Function)Rule" -cmdParams $ruleparams
+            "Successfully created $($Function) Policy for $tenantfilter."
+            Write-LogMessage -API $APINAME -tenant $tenantfilter -message "Created $($Function) Policy for $($tenantfilter)" -sev Debug
         }
-        { $_ -ne "HostedOutboundSpamFilter" } {
-            try {
-                New-ExoRequest -tenantid $Tenantfilter -cmdlet "New-$($Function)Policy" -cmdParams $RequestParams
-                $Domains = (New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-AcceptedDomain").name
-                $ruleparams = @{
-                    "Name"               = "$($RequestParams.name)";
-                    "$($Function)Policy" = "$($RequestParams.name)";
-                    "RecipientDomainIs"  = @($domains)
-                }
-                New-ExoRequest -tenantid $Tenantfilter -cmdlet "New-$($Function)Rule" -cmdParams $ruleparams
-                "Successfully created $($Function) Policy for $tenantfilter."
-                Write-LogMessage -API $APINAME -tenant $tenantfilter -message "Created $($Function) Policy for $($tenantfilter)" -sev Debug
+        catch {
+            "Could not create $($Function) Policy for $($tenantfilter): $($_.Exception.message)"
+        }
+    }
+    else {
+        try {
+            New-ExoRequest -tenantid $Tenantfilter -cmdlet "New-$($Function)Policy" -cmdParams $RequestParams
+            $Domains = (New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-AcceptedDomain").name
+            $ruleparams = @{
+                "Name"               = "$($RequestParams.name)";
+                "$($Function)Policy" = "$($RequestParams.name)";
+                "RecipientDomainIs"  = @($domains)
             }
-            catch {
-                "Could not create create $($Function) Policy for $($tenantfilter): $($_.Exception.message)"
-            }
+            New-ExoRequest -tenantid $Tenantfilter -cmdlet "New-$($Function)Rule" -cmdParams $ruleparams
+            "Successfully created $($Function) Policy for $tenantfilter."
+            Write-LogMessage -API $APINAME -tenant $tenantfilter -message "Created $($Function) Policy for $($tenantfilter)" -sev Debug
+        }
+        catch {
+            "Could not create $($Function) Policy for $($tenantfilter): $($_.Exception.message)"
         }
     }
 }
