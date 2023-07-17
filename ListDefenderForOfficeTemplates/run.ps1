@@ -6,7 +6,7 @@ param($Request, $TriggerMetadata)
 $APIName = $TriggerMetadata.FunctionName
 Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Accessed this API" -Sev "Debug"
 $Table = Get-CippTable -tablename 'templates'
-$Function = if ($request.Query.function -eq "HostedContentFilter") { "Spamfilter" } { $Request.Query.function }
+$Function = if ($request.Query.function -eq "HostedContentFilter") { "Spamfilter" } else { $Request.Query.function }
 
 if ($null -eq $request.Query.function) {
     $Table = Get-CippTable -tablename 'templates'
