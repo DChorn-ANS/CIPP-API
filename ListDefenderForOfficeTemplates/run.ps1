@@ -8,16 +8,29 @@ Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME  -
 $Table = Get-CippTable -tablename 'templates'
 $Function = if ($request.Query.function -eq "HostedContentFilter") { "Spamfilter" } { $Request.Query.function }
 
-#List new policies
-$Table = Get-CippTable -tablename 'templates'
-$Filter = "PartitionKey eq '$($Function)Template'" 
-$Templates = (Get-AzDataTableEntity @Table -Filter $Filter) | ForEach-Object {
-    $GUID = $_.RowKey
-    $Type = $_.PartitionKey
-    $data = $_.JSON | ConvertFrom-Json 
-    $data | Add-Member -NotePropertyName "GUID" -NotePropertyValue $GUID
-    $data | Add-Member -NotePropertyName "Type" -NotePropertyValue $Type
-    $data 
+if ($null -eq $request.Query.function) {
+    $Table = Get-CippTable -tablename 'templates'
+    $Filter = "PartitionKey eq 'SpamfilterTemplate' or PartitionKey eq 'HostedOutboundSpamFilterTemplate' or PartitionKey eq 'MalwareFilterTemplate' or PartitionKey eq 'SafeLinksTemplate' or PartitionKey eq 'SafeAttachmentTemplate'or PartitionKey eq 'AntiPhishTemplate'" 
+    $Templates = (Get-AzDataTableEntity @Table -Filter $Filter) | ForEach-Object {
+        $GUID = $_.RowKey
+        $Type = $_.PartitionKey
+        $data = $_.JSON | ConvertFrom-Json 
+        $data | Add-Member -NotePropertyName "GUID" -NotePropertyValue $GUID
+        $data | Add-Member -NotePropertyName "Type" -NotePropertyValue $Type
+        $data 
+    }
+}
+else {
+    $Table = Get-CippTable -tablename 'templates'
+    $Filter = "PartitionKey eq '$($Function)Template'" 
+    $Templates = (Get-AzDataTableEntity @Table -Filter $Filter) | ForEach-Object {
+        $GUID = $_.RowKey
+        $Type = $_.PartitionKey
+        $data = $_.JSON | ConvertFrom-Json 
+        $data | Add-Member -NotePropertyName "GUID" -NotePropertyValue $GUID
+        $data | Add-Member -NotePropertyName "Type" -NotePropertyValue $Type
+        $data 
+    }
 }
 
 if ($Request.query.ID) { $Templates = $Templates | Where-Object -Property RowKey -EQ $Request.query.id }
