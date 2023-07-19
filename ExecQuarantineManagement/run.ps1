@@ -12,22 +12,39 @@ Write-Host "PowerShell HTTP trigger function processed a request."
 
 
 # Interact with query parameters or the body of the request.
-Try {
-    $tenantfilter = $Request.Query.TenantFilter 
-    $params = @{
-        Identity     = $request.query.ID; 
-        AllowSender  = [boolean]$Request.query.AllowSender
-        ReleasetoAll = [boolean]$Request.query.type
-        ActionType   = $Request.query.type
+If ($request.query.type -eq "Preview") {
+    Try {
+        $tenantfilter = $Request.Query.TenantFilter 
+        $params = @{
+            Identity = $request.query.ID; 
+        }
+        Write-Host $params
+        $Results = (New-ExoRequest -tenantid $TenantFilter -cmdlet "Preview-QuarantineMessage" -cmdParams $Params)[0].body
+        Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME -tenant $($tenantfilter) -message "$($request.query.id) $Type" -Sev "Info"
     }
-    Write-Host $params
-    New-ExoRequest -tenantid $TenantFilter -cmdlet "Release-QuarantineMessage" -cmdParams $Params
-    $Results = [pscustomobject]@{"Results" = "Successfully processed $($request.query.ID)" }
-    Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME -tenant $($tenantfilter) -message "$($request.query.id)" -Sev "Info"
+    catch {
+        Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME -tenant $($tenantfilter) -message "Quarantine Management $Type failed: $($_.Exception.Message)" -Sev "Error"
+        $Results = [pscustomobject]@{"Results" = "Failed. $($_.Exception.Message)" }
+    }
 }
-catch {
-    Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME -tenant $($tenantfilter) -message "Quarantine Management failed: $($_.Exception.Message)" -Sev "Error"
-    $Results = [pscustomobject]@{"Results" = "Failed. $($_.Exception.Message)" }
+else {
+    Try {
+        $tenantfilter = $Request.Query.TenantFilter 
+        $params = @{
+            Identity     = $request.query.ID; 
+            AllowSender  = [boolean]$Request.query.AllowSender
+            ReleasetoAll = [boolean]$Request.query.type
+            ActionType   = $Request.query.type
+        }
+        Write-Host $params
+        New-ExoRequest -tenantid $TenantFilter -cmdlet "Release-QuarantineMessage" -cmdParams $Params
+        $Results = [pscustomobject]@{"Results" = "Successfully processed $($request.query.ID)" }
+        Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME -tenant $($tenantfilter) -message "$($request.query.id) $Type" -Sev "Info"
+    }
+    catch {
+        Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME -tenant $($tenantfilter) -message "Quarantine Management $Type failed: $($_.Exception.Message)" -Sev "Error"
+        $Results = [pscustomobject]@{"Results" = "Failed. $($_.Exception.Message)" }
+    }
 }
 # Associate values to output bindings by calling 'Push-OutputBinding'.
 Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
