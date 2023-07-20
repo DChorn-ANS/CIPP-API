@@ -35,6 +35,7 @@ if ($Request.query.TenantFilter -ne 'AllTenants') {
         $CAState.Add('Not Licensed for Conditional Access')
         $MFARegistration = $null
     }
+
     if ($null -ne $MFARegistration) {
         $CAPolicies = (New-GraphGetRequest -Uri 'https://graph.microsoft.com/beta/identity/conditionalAccess/policies' -tenantid $Request.query.TenantFilter -ErrorAction Stop )
 
@@ -46,12 +47,12 @@ if ($Request.query.TenantFilter -ne 'AllTenants') {
                 if (($policy.grantControls.builtincontrols -eq 'mfa') -or ($policy.grantControls.customAuthenticationFactors -eq 'RequireDuoMfa')) {
                     if ($Policy.conditions.applications.includeApplications -ne 'All') {
                         Write-Host $Policy.conditions.applications.includeApplications
-                        $CAState.Add("$($policy.name) - Specific Applications - $($policy.state)") | Out-Null
+                        $CAState.Add("$($policy.displayName) - Specific Applications - $($policy.state)") | Out-Null
                         $Policy.conditions.users.excludeUsers.foreach({ $ExcludeSpecific.Add($_) })
                         continue
                     }
                     if ($Policy.conditions.users.includeUsers -eq 'All') {
-                        $CAState.Add("$($policy.name) - All Users - $($policy.state)") | Out-Null
+                        $CAState.Add("$($policy.displayName) - All Users - $($policy.state)") | Out-Null
                         $Policy.conditions.users.excludeUsers.foreach({ $ExcludeAllUsers.Add($_) })
                         continue
                     }
@@ -61,6 +62,7 @@ if ($Request.query.TenantFilter -ne 'AllTenants') {
         catch {
         }
     }
+
     if ($CAState.count -eq 0) { $CAState.Add('None') | Out-Null }
 
 
