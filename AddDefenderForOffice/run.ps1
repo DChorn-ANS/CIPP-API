@@ -7,8 +7,8 @@ param($Request, $TriggerMetadata)
 $APIName = $TriggerMetadata.FunctionName
 Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Accessed this API" -Sev "Debug"
 
-$RequestParams = $Request.Body.PowerShellCommand | ConvertFrom-Json | Select-Object -Property * -ExcludeProperty GUID, comments
-$Function = $Request.Body.Function
+$RequestParams = $Request.Body.JSON | ConvertFrom-Json | Select-Object -Property * -ExcludeProperty GUID, comments
+$Function = $Request.Body.Type
 
 
 $Tenants = ($Request.body | Select-Object Select_*).psobject.properties.value

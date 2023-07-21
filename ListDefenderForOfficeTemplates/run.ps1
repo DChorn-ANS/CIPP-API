@@ -15,7 +15,7 @@ if ($null -eq $request.Query.function) {
         $GUID = $_.RowKey
         $Type = $_.PartitionKey
         $data = $_.JSON | ConvertFrom-Json 
-        $data | Add-Member -NotePropertyName "JSON" -NotePropertyValue $JSON
+        $data | Add-Member -NotePropertyName "JSON" -NotePropertyValue $_.JSON
         $data | Add-Member -NotePropertyName "GUID" -NotePropertyValue $GUID
         $data | Add-Member -NotePropertyName "Type" -NotePropertyValue $Type.replace("Template", "")
         $data 
