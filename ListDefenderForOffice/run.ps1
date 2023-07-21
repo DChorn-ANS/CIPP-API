@@ -13,7 +13,7 @@ try {
     $RuleState = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Rule" | Select-Object * -ExcludeProperty *odata*, *data.type*
     $GraphRequest = $Policies | Select-Object *,
     @{l = 'ruleState'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).State } },
-    @{l = 'rulePrio'; e = { $name = $_.name; { (if ($name -eq "Standard Preset Security Policy") { -1 }elseif ($name -eq "Strict Preset Security Policy") { -2 }else { ($RuleState | Where-Object name -EQ $name).Priority }) } } }
+    @{l = 'rulePrio'; e = { $name = $_.name; { ($RuleState | Where-Object name -EQ $name).Priority } } }
 
     $StatusCode = [HttpStatusCode]::OK
 }
