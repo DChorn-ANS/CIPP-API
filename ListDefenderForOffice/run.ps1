@@ -14,23 +14,23 @@ try {
     $GraphRequest = $Policies | Select-Object *,
     @{l = 'ruleState'; e = { ($RuleState | Where-Object name -EQ $_.name).State } },
     @{l = 'rulePrio'; e = { if ($_.name -eq "Standard Preset Security Policy") { -1 }elseif ($_.name -eq "Strict Preset Security Policy") { -2 }else { ($RuleState | Where-Object name -EQ $_.name).Priority } } },
-    @{l = 'ruleInclUsers'; e = { ($RuleState | Where-Object name -EQ $_.name).SentTo -join ";" } },
+    @{l = 'ruleInclUsers'; e = { ($RuleState | Where-Object name -EQ $_.name).SentTo -join "<br />" } },
     @{l = 'ruleInclUsersCount'; e = { ($RuleState | Where-Object name -EQ $_.name).SentTo | Measure-Object | Select-Object -ExpandProperty Count } },
-    @{l = 'ruleInclGroups'; e = { ($RuleState | Where-Object name -EQ $_.name).SentToMemberOf -join ";" } },
+    @{l = 'ruleInclGroups'; e = { ($RuleState | Where-Object name -EQ $_.name).SentToMemberOf -join "<br />" } },
     @{l = 'ruleInclGroupsCount'; e = { ($RuleState | Where-Object name -EQ $_.name).SentToMemberOf  | Measure-Object | Select-Object -ExpandProperty Count } },
-    @{l = 'ruleInclDomains'; e = { ($RuleState | Where-Object name -EQ $_.name).RecipientDomainIs -join ";" } },
+    @{l = 'ruleInclDomains'; e = { ($RuleState | Where-Object name -EQ $_.name).RecipientDomainIs -join "<br />" } },
     @{l = 'ruleInclDomainsCount'; e = { ($RuleState | Where-Object name -EQ $_.name).RecipientDomainIs  | Measure-Object | Select-Object -ExpandProperty Count } }, 
-    @{l = 'ruleExclUsers'; e = { ($RuleState | Where-Object name -EQ $_.name).ExceptIfSentTo -join ";" } },
+    @{l = 'ruleExclUsers'; e = { ($RuleState | Where-Object name -EQ $_.name).ExceptIfSentTo -join "<br />" } },
     @{l = 'ruleExclUsersCount'; e = { ($RuleState | Where-Object name -EQ $_.name).ExceptIfSentTo | Measure-Object | Select-Object -ExpandProperty Count } }, 
-    @{l = 'ruleExclGroups'; e = { ($RuleState | Where-Object name -EQ $_.name).ExceptIfSentToMemberOf -join ";" } },
+    @{l = 'ruleExclGroups'; e = { ($RuleState | Where-Object name -EQ $_.name).ExceptIfSentToMemberOf -join "<br />" } },
     @{l = 'ruleExclGroupCount'; e = { ($RuleState | Where-Object name -EQ $_.name).ExceptIfSentToMemberOf | Measure-Object | Select-Object -ExpandProperty Count } }, 
-    @{l = 'ruleExclDomains'; e = { ($RuleState | Where-Object name -EQ $_.name).ExceptIfRecipientDomainIs -join ";" } },
+    @{l = 'ruleExclDomains'; e = { ($RuleState | Where-Object name -EQ $_.name).ExceptIfRecipientDomainIs -join "<br />" } },
     @{l = 'ruleExclDomainsCount'; e = { ($RuleState | Where-Object name -EQ $_.name).ExceptIfRecipientDomainIs | Measure-Object | Select-Object -ExpandProperty Count } }
 
     $GraphRequest = $GraphRequest | Select-Object *,
-    @{l = 'ruleInclAll'; e = { "-Included Users-<br />" + $_.ruleInclUsers + "<br />-Included Groups-<br />" + $_.ruleInclGroups + "<br />-Included Domains-<br />" + $_.ruleInclDomains } },
+    @{l = 'ruleInclAll'; e = { "-Included Users-<br />" + $_.ruleInclUsers + "-Included Groups-<br />" + $_.ruleInclGroups + "-Included Domains-<br />" + $_.ruleInclDomains } },
     @{l = 'ruleInclAllCount'; e = { $_.ruleInclUsersCount + $_.ruleInclGroupsCount + $_.ruleInclDomainsCount } },
-    @{l = 'ruleExclAll'; e = { "-Excluded Users-<br />" + $_.ruleExclUsers + "<br />-Excluded Groups-<br />" + $_.ruleExclGroups + "<br />-Excluded Domains-<br />" + $_.ruleExclDomains } },
+    @{l = 'ruleExclAll'; e = { "-Excluded Users-<br />" + $_.ruleExclUsers + "-Excluded Groups-<br />" + $_.ruleExclGroups + "-Excluded Domains-<br />" + $_.ruleExclDomains } },
     @{l = 'ruleExclAllCount'; e = { $_.ruleExclUsersCount + $_.ruleExclGroupsCount + $_.ruleExclDomainsCount } }
     $StatusCode = [HttpStatusCode]::OK
 }
