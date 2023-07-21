@@ -12,20 +12,20 @@ try {
     $Policies = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Policy" | Select-Object * -ExcludeProperty *odata*, *data.type*
     $RuleState = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Rule" | Select-Object * -ExcludeProperty *odata*, *data.type*
     $GraphRequest = $Policies | Select-Object *,
-    @{l = 'ruleState'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).State } },
-    @{l = 'rulePrio'; e = { $name = $_.name; { if ($name -eq "Standard Preset Security Policy") { -1 }elseif ($name -eq "Strict Preset Security Policy") { -2 }else { ($RuleState | Where-Object name -EQ $name).Priority } } } },
-    @{l = 'ruleInclUsers'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).SentTo -join "<br />" } },
-    @{l = 'ruleInclUsersCount'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).SentTo | Measure-Object | Select-Object -ExpandProperty Count } },
-    @{l = 'ruleInclGroups'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).SentToMemberOf -join "<br />" } },
-    @{l = 'ruleInclGroupsCount'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).SentToMemberOf  | Measure-Object | Select-Object -ExpandProperty Count } },
-    @{l = 'ruleInclDomains'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).RecipientDomainIs -join "<br />" } },
-    @{l = 'ruleInclDomainsCount'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).RecipientDomainIs  | Measure-Object | Select-Object -ExpandProperty Count } }, 
-    @{l = 'ruleExclUsers'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).ExceptIfSentTo -join "<br />" } },
-    @{l = 'ruleExclUsersCount'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).ExceptIfSentTo | Measure-Object | Select-Object -ExpandProperty Count } }, 
-    @{l = 'ruleExclGroups'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).ExceptIfSentToMemberOf -join "<br />" } },
-    @{l = 'ruleExclGroupCount'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).ExceptIfSentToMemberOf | Measure-Object | Select-Object -ExpandProperty Count } }, 
-    @{l = 'ruleExclDomains'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).ExceptIfRecipientDomainIs -join "<br />" } },
-    @{l = 'ruleExclDomainsCount'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).ExceptIfRecipientDomainIs | Measure-Object | Select-Object -ExpandProperty Count } }
+    @{l = 'ruleState'; e = { ($RuleState | Where-Object name -EQ $_.name).State } },
+    @{l = 'rulePrio'; e = { if ($_.name -eq "Standard Preset Security Policy") { -1 }elseif ($_.name -eq "Strict Preset Security Policy") { -2 }else { ($RuleState | Where-Object name -EQ $_.name).Priority } } },
+    @{l = 'ruleInclUsers'; e = { ($RuleState | Where-Object name -EQ $_.name).SentTo -join "<br />" } },
+    @{l = 'ruleInclUsersCount'; e = { ($RuleState | Where-Object name -EQ $_.name).SentTo | Measure-Object | Select-Object -ExpandProperty Count } },
+    @{l = 'ruleInclGroups'; e = { ($RuleState | Where-Object name -EQ $_.name).SentToMemberOf -join "<br />" } },
+    @{l = 'ruleInclGroupsCount'; e = { ($RuleState | Where-Object name -EQ $_.name).SentToMemberOf  | Measure-Object | Select-Object -ExpandProperty Count } },
+    @{l = 'ruleInclDomains'; e = { ($RuleState | Where-Object name -EQ $_.name).RecipientDomainIs -join "<br />" } },
+    @{l = 'ruleInclDomainsCount'; e = { ($RuleState | Where-Object name -EQ $_.name).RecipientDomainIs  | Measure-Object | Select-Object -ExpandProperty Count } }, 
+    @{l = 'ruleExclUsers'; e = { ($RuleState | Where-Object name -EQ $_.name).ExceptIfSentTo -join "<br />" } },
+    @{l = 'ruleExclUsersCount'; e = { ($RuleState | Where-Object name -EQ $_.name).ExceptIfSentTo | Measure-Object | Select-Object -ExpandProperty Count } }, 
+    @{l = 'ruleExclGroups'; e = { ($RuleState | Where-Object name -EQ $_.name).ExceptIfSentToMemberOf -join "<br />" } },
+    @{l = 'ruleExclGroupCount'; e = { ($RuleState | Where-Object name -EQ $_.name).ExceptIfSentToMemberOf | Measure-Object | Select-Object -ExpandProperty Count } }, 
+    @{l = 'ruleExclDomains'; e = { ($RuleState | Where-Object name -EQ $_.name).ExceptIfRecipientDomainIs -join "<br />" } },
+    @{l = 'ruleExclDomainsCount'; e = { ($RuleState | Where-Object name -EQ $_.name).ExceptIfRecipientDomainIs | Measure-Object | Select-Object -ExpandProperty Count } }
     $StatusCode = [HttpStatusCode]::OK
 }
 catch {
