@@ -26,6 +26,12 @@ try {
     @{l = 'ruleExclGroupCount'; e = { ($RuleState | Where-Object name -EQ $_.name).ExceptIfSentToMemberOf | Measure-Object | Select-Object -ExpandProperty Count } }, 
     @{l = 'ruleExclDomains'; e = { ($RuleState | Where-Object name -EQ $_.name).ExceptIfRecipientDomainIs -join "<br />" } },
     @{l = 'ruleExclDomainsCount'; e = { ($RuleState | Where-Object name -EQ $_.name).ExceptIfRecipientDomainIs | Measure-Object | Select-Object -ExpandProperty Count } }
+
+    $GraphRequest = $GraphRequest | Select-Object *,
+    @{l = 'ruleInclAll'; e = { "<u>Included Users</u><br />" + $_.ruleInclUsers + "<br /><u>Included Groups</u><br />" + $_.ruleInclGroups + "<br /><u>Included Domains</u><br />" + $_.ruleInclDomains } },
+    @{l = 'ruleInclAllCount'; e = { $_.ruleInclUsersCount + $_.ruleInclGroupsCount + $_.ruleInclDomainsCount } },
+    @{l = 'ruleExclAll'; e = { "<u>Excluded Users</u><br />" + $_.ruleExclUsers + "<br /><u>Excluded Groups</u><br />" + $_.ruleExclGroups + "<br /><u>Excluded Domains</u><br />" + $_.ruleExclDomains } },
+    @{l = 'ruleExclAllCount'; e = { $_.ruleExclUsersCount + $_.ruleExclGroupsCount + $_.ruleExclDomainsCount } }
     $StatusCode = [HttpStatusCode]::OK
 }
 catch {
