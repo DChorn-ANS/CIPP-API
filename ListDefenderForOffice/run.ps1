@@ -13,12 +13,7 @@ try {
     $RuleState = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Rule" | Select-Object * -ExcludeProperty *odata*, *data.type*
     $GraphRequest = $Policies | Select-Object *,
     @{l = 'ruleState'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).State } },
-    @{l = 'rulePrio'; e = { $name = $_.name; {
-            (if ($name = "Standard Preset Security Policy") { -1 
-                }elseif ($name = "Strict Preset Security Policy") { -2 
-                }else { ($RuleState | Where-Object name -EQ $name).Priority }
-            ) } }
-    },
+    @{l = 'rulePrio'; e = { $name = $_.name; { (if ($name = "Standard Preset Security Policy") { -1 }elseif ($name = "Strict Preset Security Policy") { -2 }else { ($RuleState | Where-Object name -EQ $name).Priority }) } } },
     @{l = 'ruleInclUsers'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).IncludedSenders -join "<br />" } },
     @{l = 'ruleInclUsersCount'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).IncludedSenders | Measure-Object | Select-Object -ExpandProperty Count } },
     @{l = 'ruleInclGroups'; e = { $name = $_.name; ($RuleState | Where-Object name -EQ $name).IncludedGroups -join "<br />" } },
