@@ -17,7 +17,7 @@ if ($null -eq $request.Query.function) {
         $data = $_.JSON | ConvertFrom-Json 
         $data | Add-Member -NotePropertyName "JSON" -NotePropertyValue $_.JSON
         $data | Add-Member -NotePropertyName "GUID" -NotePropertyValue $GUID
-        $data | Add-Member -NotePropertyName "Type" -NotePropertyValue $Type.replace("Template", "")
+        $data | Add-Member -NotePropertyName "Type" -NotePropertyValue $Type.replace("Template", "").replace("Spamfilter", "HostedContentFilter")
         $data 
     }
 }
@@ -30,7 +30,7 @@ else {
         $data = $_.JSON | ConvertFrom-Json 
         $data | Add-Member -NotePropertyName "JSON" -NotePropertyValue $_.JSON
         $data | Add-Member -NotePropertyName "GUID" -NotePropertyValue $GUID
-        $data | Add-Member -NotePropertyName "Type" -NotePropertyValue $Type.replace("Template", "")
+        $data | Add-Member -NotePropertyName "Type" -NotePropertyValue $Type.replace("Template", "").replace("Spamfilter", "HostedContentFilter")
         $data 
     }
 }
