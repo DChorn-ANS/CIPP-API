@@ -16,7 +16,7 @@ if ($null -eq $request.Query.function) {
         $Type = $_.PartitionKey
         $data = $_.JSON | ConvertFrom-Json 
         $data | Add-Member -NotePropertyName "GUID" -NotePropertyValue $GUID
-        $data | Add-Member -NotePropertyName "Type" -NotePropertyValue $Type
+        $data | Add-Member -NotePropertyName "Type" -NotePropertyValue $Type.replace("Template", "")
         $data 
     }
 }
@@ -28,7 +28,7 @@ else {
         $Type = $_.PartitionKey
         $data = $_.JSON | ConvertFrom-Json 
         $data | Add-Member -NotePropertyName "GUID" -NotePropertyValue $GUID
-        $data | Add-Member -NotePropertyName "Type" -NotePropertyValue $Type
+        $data | Add-Member -NotePropertyName "Type" -NotePropertyValue $Type.replace("Template", "")
         $data 
     }
 }
