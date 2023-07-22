@@ -12,8 +12,8 @@ $RuleState = New-Object System.Collections.ArrayList
 
 try {
     $Policies = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Policy" | Select-Object * -ExcludeProperty *odata*, *data.type*
-    $RuleState.add({ New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Rule" | Select-Object * -ExcludeProperty *odata*, *data.type* })
-    $Rulestate.add({ New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPProtectionPolicyRuleRule" | Select-Object * -ExcludeProperty *odata*, *data.type* })
+    New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Rule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
+    New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPProtectionPolicyRuleRule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
     $GraphRequest = $Policies | Select-Object *,
     @{l = 'ruleState'; e = { ($RuleState | Where-Object name -EQ $_.name).State } },
     @{l = 'rulePrio'; e = { if ($_.name -eq "Standard Preset Security Policy") { -1 }elseif ($_.name -eq "Strict Preset Security Policy") { -2 }else { ($RuleState | Where-Object name -EQ $_.name).Priority } } },
