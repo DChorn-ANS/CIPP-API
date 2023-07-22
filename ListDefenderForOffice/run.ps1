@@ -35,7 +35,7 @@ try {
 
     $GraphRequest = $GraphRequest | Select-Object *,
     @{l = 'ruleInclAll'; e = { "-Included Users-<br />" + $_.ruleInclUsers + "<br />-Included Groups-<br />" + $_.ruleInclGroups + "<br />-Included Domains-<br />" + $_.ruleInclDomains } },
-    @{l = 'ruleInclAllCount'; e = { if ($_.name -eq "Default" -or $_.name -eq "Built-In Protection Policy") { "Default" }else { $_.ruleInclUsersCount + $_.ruleInclGroupsCount + $_.ruleInclDomainsCount } } },
+    @{l = 'ruleInclAllCount'; e = { if ($_.name -eq "Default" -or $_.name -eq "Built-In Protection Policy") { "default" }else { $_.ruleInclUsersCount + $_.ruleInclGroupsCount + $_.ruleInclDomainsCount } } },
     @{l = 'ruleExclAll'; e = { "-Excluded Users-<br />" + $_.ruleExclUsers + "<br />-Excluded Groups-<br />" + $_.ruleExclGroups + "<br />-Excluded Domains-<br />" + $_.ruleExclDomains } },
     @{l = 'ruleExclAllCount'; e = { $_.ruleExclUsersCount + $_.ruleExclGroupsCount + $_.ruleExclDomainsCount } }
     $StatusCode = [HttpStatusCode]::OK
