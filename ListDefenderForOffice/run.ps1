@@ -8,9 +8,11 @@ Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME  -
 $Tenantfilter = $request.Query.tenantfilter
 $Function = $request.Query.Function
 
+$RuleState = New-Object System.Collections.ArrayList
+
 try {
     $Policies = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Policy" | Select-Object * -ExcludeProperty *odata*, *data.type*
-    $RuleState = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Rule" | Select-Object * -ExcludeProperty *odata*, *data.type*
+    $RuleState.add({ New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Rule" | Select-Object * -ExcludeProperty *odata*, *data.type* })
     $Rulestate.add({ New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPProtectionPolicyRuleRule" | Select-Object * -ExcludeProperty *odata*, *data.type* })
     $GraphRequest = $Policies | Select-Object *,
     @{l = 'ruleState'; e = { ($RuleState | Where-Object name -EQ $_.name).State } },
