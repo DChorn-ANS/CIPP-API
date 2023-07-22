@@ -11,6 +11,7 @@ $Function = $request.Query.Function
 try {
     $Policies = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Policy" | Select-Object * -ExcludeProperty *odata*, *data.type*
     $RuleState = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Rule" | Select-Object * -ExcludeProperty *odata*, *data.type*
+    $Rulestate.add({ New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPProtectionPolicyRuleRule" | Select-Object * -ExcludeProperty *odata*, *data.type* })
     $GraphRequest = $Policies | Select-Object *,
     @{l = 'ruleState'; e = { ($RuleState | Where-Object name -EQ $_.name).State } },
     @{l = 'rulePrio'; e = { if ($_.name -eq "Standard Preset Security Policy") { -1 }elseif ($_.name -eq "Strict Preset Security Policy") { -2 }else { ($RuleState | Where-Object name -EQ $_.name).Priority } } },
@@ -29,19 +30,19 @@ try {
 
     $GraphRequest = $GraphRequest | Select-Object *,
     @{l = 'ruleInclAll'; e = { "-Included Users-<br />" + $_.ruleInclUsers + "<br />-Included Groups-<br />" + $_.ruleInclGroups + "<br />-Included Domains-<br />" + $_.ruleInclDomains } },
-    @{l = 'ruleInclAllCount'; e = { if ($_.name -eq "Default" -or $_.name -eq "Built-In Protection Policy") { "Default" }else { $_.name -eq " "$_.ruleInclUsersCount + $_.ruleInclGroupsCount + $_.ruleInclDomainsCount } },
-        @{l = 'ruleExclAll'; e = { "-Excluded Users-<br />" + $_.ruleExclUsers + "<br />-Excluded Groups-<br />" + $_.ruleExclGroups + "<br />-Excluded Domains-<br />" + $_.ruleExclDomains } },
-        @{l = 'ruleExclAllCount'; e = { $_.ruleExclUsersCount + $_.ruleExclGroupsCount + $_.ruleExclDomainsCount } }
-        $StatusCode = [HttpStatusCode]::OK
-    }
-    catch {
-        $ErrorMessage = Get-NormalizedError -Message $_.Exception.Message
-        $StatusCode = [HttpStatusCode]::Forbidden
-        $GraphRequest = $ErrorMessage
-    }
+    @{l = 'ruleInclAllCount'; e = { if ($_.name -eq "Default" -or $_.name -eq "Built-In Protection Policy") { "Default" }else { $_.ruleInclUsersCount + $_.ruleInclGroupsCount + $_.ruleInclDomainsCount } } },
+    @{l = 'ruleExclAll'; e = { "-Excluded Users-<br />" + $_.ruleExclUsers + "<br />-Excluded Groups-<br />" + $_.ruleExclGroups + "<br />-Excluded Domains-<br />" + $_.ruleExclDomains } },
+    @{l = 'ruleExclAllCount'; e = { $_.ruleExclUsersCount + $_.ruleExclGroupsCount + $_.ruleExclDomainsCount } }
+    $StatusCode = [HttpStatusCode]::OK
+}
+catch {
+    $ErrorMessage = Get-NormalizedError -Message $_.Exception.Message
+    $StatusCode = [HttpStatusCode]::Forbidden
+    $GraphRequest = $ErrorMessage
+}
 
-    # Associate values to output bindings by calling 'Push-OutputBinding'.
-    Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
-            StatusCode = $StatusCode
-            Body       = @($GraphRequest)
-        })
+# Associate values to output bindings by calling 'Push-OutputBinding'.
+Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
+        StatusCode = $StatusCode
+        Body       = @($GraphRequest)
+    })
