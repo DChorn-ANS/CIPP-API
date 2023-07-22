@@ -15,7 +15,7 @@ try {
     New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Rule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
     New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPProtectionPolicyRule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
     New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPBuiltInProtectionRule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
-    $Policies = $Policies | Where-Object -FilterScript { $_.name -in $RuleState.name -or $_.name -eq "Default" }
+    $Policies = $Policies | Where-Object -FilterScript { $_.name -in $RuleState.name -or $_.IsDefault -eq $true }
     
     $GraphRequest = $Policies | Select-Object *,
     @{l = 'ruleState'; e = { ($RuleState | Where-Object name -EQ $_.name).State } },
