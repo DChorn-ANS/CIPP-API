@@ -35,7 +35,7 @@ else {
     }
 }
 
-if ($Request.query.ID) { $Templates = $Templates | Where-Object -Property RowKey -EQ $Request.query.id }
+if ($Request.query.ID) { $Templates = $Templates | Where-Object -Property GUID -EQ $Request.query.id }
 
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
