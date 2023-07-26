@@ -12,16 +12,17 @@ $Params = @{
     Identity = $request.query.name
 }
 $AnchorMailbox = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-Mailbox" -cmdParams @{Resultsize = 1}
-
-try {
-    $cmdlet = if ($request.query.state -eq "enable") { "Enable-$($Function)Rule" } else { "Disable-$($Function)Rule" }
-    New-ExoRequest -tenantid $Tenantfilter -cmdlet $cmdlet -cmdParams $params -Anchor $($AnchorMailbox).PrimarySmtpAddress
-    $Result = "Set $($Function) rule to $($request.query.State)"
-    Write-LogMessage -API $APIName -tenant $tenantfilter -message "Set $($Function) rule $($Request.query.name) to $($request.query.State)" -sev Debug
-}
-catch {
-    $ErrorMessage = Get-NormalizedError -Message $_.Exception
-    $Result = $ErrorMessage
+if($Request.query.state){
+    try {
+        $cmdlet = if ($request.query.state -eq "enable") { "Enable-$($Function)Rule" } else { "Disable-$($Function)Rule" }
+        New-ExoRequest -tenantid $Tenantfilter -cmdlet $cmdlet -cmdParams $params -Anchor $($AnchorMailbox).PrimarySmtpAddress
+        $Result = "Set $($Function) rule to $($request.query.State)"
+        Write-LogMessage -API $APIName -tenant $tenantfilter -message "Set $($Function) rule $($Request.query.name) to $($request.query.State)" -sev Debug
+    }
+    catch {
+        $ErrorMessage = Get-NormalizedError -Message $_.Exception
+        $Result = $ErrorMessage
+    }
 }
 
 # Associate values to output bindings by calling 'Push-OutputBinding'.
