@@ -12,18 +12,19 @@ $Function = $Request.Body.Type
 
 
 $Tenants = ($Request.body | Select-Object Select_*).psobject.properties.value
+$AnchorMailbox = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-Mailbox" -cmdParams @{Resultsize = 1}
 
 $Result = foreach ($Tenantfilter in $tenants) {
     if ($Function -eq "HostedOutboundSpamFilter" ) {
         try {
-            New-ExoRequest -tenantid $Tenantfilter -cmdlet "New-$($Function)Policy" -cmdParams $RequestParams
+            New-ExoRequest -tenantid $Tenantfilter -cmdlet "New-$($Function)Policy" -cmdParams $RequestParams -Anchor $($AnchorMailbox).PrimarySmtpAddress
             $Domains = (New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-AcceptedDomain").name
             $ruleparams = @{
                 "Name"               = "$($RequestParams.name)";
                 "$($Function)Policy" = "$($RequestParams.name)";
                 "SenderDomainIs"     = @($domains)
             }
-            New-ExoRequest -tenantid $Tenantfilter -cmdlet "New-$($Function)Rule" -cmdParams $ruleparams
+            New-ExoRequest -tenantid $Tenantfilter -cmdlet "New-$($Function)Rule" -cmdParams $ruleparams -Anchor $($AnchorMailbox).PrimarySmtpAddress
             "Successfully created $($Function) Policy for $tenantfilter."
             Write-LogMessage -API $APINAME -tenant $tenantfilter -message "Created $($Function) Policy for $($tenantfilter)" -sev Debug
         }
@@ -33,14 +34,14 @@ $Result = foreach ($Tenantfilter in $tenants) {
     }
     else {
         try {
-            New-ExoRequest -tenantid $Tenantfilter -cmdlet "New-$($Function)Policy" -cmdParams $RequestParams
+            New-ExoRequest -tenantid $Tenantfilter -cmdlet "New-$($Function)Policy" -cmdParams $RequestParams -Anchor $($AnchorMailbox).PrimarySmtpAddress
             $Domains = (New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-AcceptedDomain").name
             $ruleparams = @{
                 "Name"               = "$($RequestParams.name)";
                 "$($Function)Policy" = "$($RequestParams.name)";
                 "RecipientDomainIs"  = @($domains)
             }
-            New-ExoRequest -tenantid $Tenantfilter -cmdlet "New-$($Function)Rule" -cmdParams $ruleparams
+            New-ExoRequest -tenantid $Tenantfilter -cmdlet "New-$($Function)Rule" -cmdParams $ruleparams -Anchor $($AnchorMailbox).PrimarySmtpAddress
             "Successfully created $($Function) Policy for $tenantfilter."
             Write-LogMessage -API $APINAME -tenant $tenantfilter -message "Created $($Function) Policy for $($tenantfilter)" -sev Debug
         }
