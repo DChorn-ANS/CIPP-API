@@ -11,12 +11,13 @@ $Function = $request.Query.function
 $Params = @{
     Identity = $request.query.name
 }
+$AnchorMailbox = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-Mailbox" -cmdParams @{Resultsize = 1}
 
 try {
     $cmdlet = "Remove-$($Function)Rule"
-    New-ExoRequest -tenantid $Tenantfilter -cmdlet $cmdlet -cmdParams $params
+    New-ExoRequest -tenantid $Tenantfilter -cmdlet $cmdlet -cmdParams $params -Anchor $($AnchorMailbox).PrimarySmtpAddress
     $cmdlet = "Remove-$($Function)Policy"
-    New-ExoRequest -tenantid $Tenantfilter -cmdlet $cmdlet -cmdParams $params
+    New-ExoRequest -tenantid $Tenantfilter -cmdlet $cmdlet -cmdParams $params -Anchor $($AnchorMailbox).PrimarySmtpAddress
     $Result = "Deleted $($Request.query.name)"
     Write-LogMessage -API $APIName -tenant $tenantfilter -message "Deleted $($Function) rule $($Request.query.name)" -sev Debug
 }
