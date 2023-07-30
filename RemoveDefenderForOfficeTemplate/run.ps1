@@ -5,7 +5,7 @@ param($Request, $TriggerMetadata)
 
 $APIName = $TriggerMetadata.FunctionName
 Write-LogMessage -user $request.headers.'x-ms-client-principal' -API $APINAME  -message "Accessed this API" -Sev "Debug"
-$Function = if ($request.Query.function -eq "HostedContentFilter") { "Spamfilter" } { $Request.Query.function }
+$Function = if ($request.Query.function -eq "HostedContentFilter") { "Spamfilter" } else { $Request.Query.function }
 
 $ID = $request.query.id
 try {
