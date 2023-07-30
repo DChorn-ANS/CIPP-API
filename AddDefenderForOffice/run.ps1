@@ -12,9 +12,10 @@ $Function = $Request.Body.Type
 
 
 $Tenants = ($Request.body | Select-Object Select_*).psobject.properties.value
-$AnchorMailbox = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-Mailbox" -cmdParams @{Resultsize = 1}
+
 
 $Result = foreach ($Tenantfilter in $tenants) {
+    $AnchorMailbox = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-Mailbox" -cmdParams @{Resultsize = 1 }
     if ($Function -eq "HostedOutboundSpamFilter" ) {
         try {
             New-ExoRequest -tenantid $Tenantfilter -cmdlet "New-$($Function)Policy" -cmdParams $RequestParams -Anchor $($AnchorMailbox).PrimarySmtpAddress
