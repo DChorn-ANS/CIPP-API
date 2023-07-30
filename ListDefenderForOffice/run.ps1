@@ -9,12 +9,13 @@ $Tenantfilter = $request.Query.tenantfilter
 $Function = $request.Query.Function
 
 $RuleState = New-Object System.Collections.ArrayList
+New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPProtectionPolicyRule"  -ErrorAction SilentlyContinue | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
+New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPBuiltInProtectionRule"  -ErrorAction SilentlyContinue | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
+
 
 try {
     $Policies = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Policy" | Select-Object * -ExcludeProperty *odata*, *data.type*
     New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Rule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
-    New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPProtectionPolicyRule"  -ErrorAction SilentlyContinue | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
-    New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPBuiltInProtectionRule"  -ErrorAction SilentlyContinue | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
     $Policies = $Policies | Where-Object -FilterScript { $_.name -in $RuleState.name -or $_.IsDefault -eq $true -or $_.IsBuiltInProtection -eq $true }
     
     $GraphRequest = $Policies | Select-Object *,
