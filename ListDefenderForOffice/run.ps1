@@ -9,15 +9,11 @@ $Tenantfilter = $request.Query.tenantfilter
 $Function = $request.Query.Function
 
 $RuleState = New-Object System.Collections.ArrayList
-New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPProtectionPolicyRule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
-New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPBuiltInProtectionRule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
-
 
 try {
     $Policies = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Policy" | Select-Object * -ExcludeProperty *odata*, *data.type*
     New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Rule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
     $Policies = $Policies | Where-Object -FilterScript { $_.name -in $RuleState.name -or $_.IsDefault -eq $true -or $_.IsBuiltInProtection -eq $true }
-    
     $GraphRequest = $Policies | Select-Object *,
     @{l = 'ruleState'; e = { if ($_.isDefault -eq $true -or $_.isBuiltInProtection -eq $true) { "Default" }else { ($RuleState | Where-Object name -EQ $_.name).State } } },
     @{l = 'rulePrio'; e = { if ($_.isDefault -eq $true -or $_.isBuiltInProtection -eq $true) { "Lowest" }elseif ($_.name -eq "Standard Preset Security Policy") { -1 }elseif ($_.name -eq "Strict Preset Security Policy") { -2 }elseif ($_.isDefault -eq $true -or $_.isBuiltInProtection -eq $true) { "default" }else { ($RuleState | Where-Object name -EQ $_.name).Priority } } },
