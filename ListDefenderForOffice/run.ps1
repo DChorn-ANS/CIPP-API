@@ -11,19 +11,21 @@ $Function = $request.Query.Function
 $RuleState = New-Object System.Collections.ArrayList
 
 try {
-    New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPProtectionPolicyRule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
-    New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPBuiltInProtectionRule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
-}
-catch {
-}
-
-try {
+    if ($Function -eq "SafeAttachment" -or $Function -eq "SafeLinks") { New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPBuiltInProtectionRule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) } }
     $Policies = New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Policy" | Select-Object * -ExcludeProperty *odata*, *data.type*
     New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Rule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
+    try {
+        New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPProtectionPolicyRule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
+        $ATPLicense = $true
+    }
+    catch {
+        New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-EOPProtectionPolicyRule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
+        $ATPLicense = $false
+    }
     $Policies = $Policies | Where-Object -FilterScript { $_.name -in $RuleState.name -or $_.IsDefault -eq $true -or $_.IsBuiltInProtection -eq $true }
     $GraphRequest = $Policies | Select-Object *,
     @{l = 'ruleState'; e = { if ($_.isDefault -eq $true -or $_.isBuiltInProtection -eq $true) { "Default" }else { ($RuleState | Where-Object name -EQ $_.name).State } } },
-    @{l = 'rulePrio'; e = { if ($_.isDefault -eq $true -or $_.isBuiltInProtection -eq $true) { "Lowest" }elseif ($_.name -eq "Standard Preset Security Policy") { -1 }elseif ($_.name -eq "Strict Preset Security Policy") { -2 }elseif ($_.isDefault -eq $true -or $_.isBuiltInProtection -eq $true) { "default" }else { ($RuleState | Where-Object name -EQ $_.name).Priority } } },
+    @{l = 'rulePrio'; e = { if ($_.isDefault -eq $true -or $_.isBuiltInProtection -eq $true) { "Lowest" }elseif ($_.name -eq "Standard Preset Security Policy") { -1 }elseif ($_.name -eq "Strict Preset Security Policy") { -2 }else { ($RuleState | Where-Object name -EQ $_.name).Priority } } },
     @{l = 'ruleInclAll'; e = { "-Included Users-<br />" + (($RuleState | Where-Object name -EQ $_.name).SentTo -join "<br />") + "<br />-Included Groups-<br />" + (($RuleState | Where-Object name -EQ $_.name).SentToMemberOf -join "<br />") + "<br />-Included Domains-<br />" + (($RuleState | Where-Object name -EQ $_.name).RecipientDomainIs -join "<br />") } },
     @{l = 'ruleInclAllCount'; e = { if ($_.isDefault -eq $true -or $_.isBuiltInProtection -eq $true) { "default" }else { (($RuleState | Where-Object name -EQ $_.name).SentTo + ($RuleState | Where-Object name -EQ $_.name).SentToMemberOf + ($RuleState | Where-Object name -EQ $_.name).RecipientDomainIs) | Measure-Object | Select-Object -ExpandProperty Count } } },
     @{l = 'ruleExclAll'; e = { "-Included Users-<br />" + (($RuleState | Where-Object name -EQ $_.name).ExceptIfSentTo -join "<br />") + "<br />-Included Groups-<br />" + (($RuleState | Where-Object name -EQ $_.name).ExceptIfSentToMemberOf -join "<br />") + "<br />-Included Domains-<br />" + (($RuleState | Where-Object name -EQ $_.name).ExceptIfRecipientDomainIs -join "<br />") } },
@@ -38,6 +40,7 @@ try {
     @{l = 'AllBlockedCount'; e = { $($_.BlockedSenders) + $($_.BlockedSenderDomains) | Measure-Object | Select-Object -ExpandProperty Count } },
     @{l = 'AllPhishExcluded'; e = { "-Trusted Senders-<br />" + ($($_.ExcludedSenders) -join "<br />") + "<br />-Trusted Domains-<br />" + ($($_.ExcludedDomains) -join "<br />") } },
     @{l = 'AllPhishExcludedCount'; e = { $($_.ExcludedSenders) + $($_.ExcludedDomains) | Measure-Object | Select-Object -ExpandProperty Count } }
+    @{l = 'ATPLicense'; e = { $ATPLicense } }
     $StatusCode = [HttpStatusCode]::OK
 }
 catch {
