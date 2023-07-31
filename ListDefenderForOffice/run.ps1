@@ -22,7 +22,7 @@ try {
     }
     $Policies = $Policies | Where-Object -FilterScript { $_.name -in $RuleState.name -or $_.IsDefault -eq $true -or $_.IsBuiltInProtection -eq $true -or $_.name -like "Standard Preset Security Policy*" -or $_.name -like "Strict Preset Security Policy*" }
     $Policies = $Policies | Select-Object -ExcludeProperty name -Property *,
-    @{l = 'name'; e = { if ($_.name -like "Standard Preset Security Policy*") { "Standard Preset Security Policy" }elseif ($_.name -like "Strict Preset Security Policy*") { "Strict Preset Security Policy" } else { $_.name } } }
+    @{l = 'Name'; e = { if ($_.name -like "Standard Preset Security Policy*") { "Standard Preset Security Policy" }elseif ($_.name -like "Strict Preset Security Policy*") { "Strict Preset Security Policy" } else { $_.name } } }
     $GraphRequest = $Policies | Select-Object *,
     @{l = 'ruleState'; e = { if ($_.isDefault -eq $true -or $_.isBuiltInProtection -eq $true) { "Default" }else { ($RuleState | Where-Object name -EQ $_.name).State } } },
     @{l = 'rulePrio'; e = { if ($_.isDefault -eq $true -or $_.isBuiltInProtection -eq $true) { "Lowest" }elseif ($_.name -eq "Standard Preset Security Policy") { -1 }elseif ($_.name -eq "Strict Preset Security Policy") { -2 }else { ($RuleState | Where-Object name -EQ $_.name).Priority } } },
