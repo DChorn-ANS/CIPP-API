@@ -9,9 +9,12 @@ $Tenantfilter = $request.Query.tenantfilter
 $Function = $request.Query.Function
 
 $RuleState = New-Object System.Collections.ArrayList
+
 try {
     New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPProtectionPolicyRule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
     New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPBuiltInProtectionRule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
+}
+catch {
 }
 
 try {
