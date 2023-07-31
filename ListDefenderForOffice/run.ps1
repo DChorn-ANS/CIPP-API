@@ -21,6 +21,8 @@ try {
         New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-EOPProtectionPolicyRule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
     }
     $Policies = $Policies | Where-Object -FilterScript { $_.name -in $RuleState.name -or $_.IsDefault -eq $true -or $_.IsBuiltInProtection -eq $true -or $_.name -like "Standard Preset Security Policy*" -or $_.name -like "Strict Preset Security Policy*" }
+    $Policies = $Policies | Select-Object -ExcludeProperty name -Property *,
+    @{l = 'name'; e = { if ($_.name -like "Standard Preset Security Policy*") { "Standard Preset Security Policy" }elseif ($_.name -like "Strict Preset Security Policy*") { "Strict Preset Security Policy" } else { $_.name } } }
     $GraphRequest = $Policies | Select-Object *,
     @{l = 'ruleState'; e = { if ($_.isDefault -eq $true -or $_.isBuiltInProtection -eq $true) { "Default" }else { ($RuleState | Where-Object name -EQ $_.name).State } } },
     @{l = 'rulePrio'; e = { if ($_.isDefault -eq $true -or $_.isBuiltInProtection -eq $true) { "Lowest" }elseif ($_.name -eq "Standard Preset Security Policy") { -1 }elseif ($_.name -eq "Strict Preset Security Policy") { -2 }else { ($RuleState | Where-Object name -EQ $_.name).Priority } } },
@@ -38,7 +40,6 @@ try {
     @{l = 'AllBlockedCount'; e = { $($_.BlockedSenders) + $($_.BlockedSenderDomains) | Measure-Object | Select-Object -ExpandProperty Count } },
     @{l = 'AllPhishExcluded'; e = { "-Trusted Senders-<br />" + ($($_.ExcludedSenders) -join "<br />") + "<br />-Trusted Domains-<br />" + ($($_.ExcludedDomains) -join "<br />") } },
     @{l = 'AllPhishExcludedCount'; e = { $($_.ExcludedSenders) + $($_.ExcludedDomains) | Measure-Object | Select-Object -ExpandProperty Count } }
-    @{l = 'name'; e = { if ($_.name -like "Standard Preset Security Policy*") { "Standard Preset Security Policy" }elseif ($_.name -like "Strict Preset Security Policy*") { "Strict Preset Security Policy" } else { $_.name } } } -ExcludeProperty name
     $StatusCode = [HttpStatusCode]::OK
 }
 catch {
