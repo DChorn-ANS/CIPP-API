@@ -22,8 +22,8 @@ try {
         New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-EOPProtectionPolicyRule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
     }
     $Policies = $Policies | Select-Object -ExcludeProperty name -Property *,
-    @{l = 'Name'; e = { $_.Identity } }
-    $Policies = $Policies | Where-Object -FilterScript { $_.name -like $RuleState.Identity -or $_.IsDefault -eq $true -or $_.IsBuiltInProtection -eq $true }
+    @{l = 'Name'; e = { if ($_.name -like "Standard Preset Security Policy*") { "Standard Preset Security Policy" }elseif ($_.name -like "Strict Preset Security Policy*") { "Strict Preset Security Policy" } else { $_.name } } }
+    $Policies = $Policies | Where-Object -FilterScript { $_.name -like $RuleState.name -or $_.IsDefault -eq $true -or $_.IsBuiltInProtection -eq $true }
     $GraphRequest = $Policies | Select-Object *,
     @{l = 'ruleState'; e = { if ($_.isDefault -eq $true -or $_.isBuiltInProtection -eq $true) { "Default" }else { ($RuleState | Where-Object name -EQ $_.name).State } } },
     @{l = 'rulePrio'; e = { if ($_.isDefault -eq $true -or $_.isBuiltInProtection -eq $true) { "Lowest" }elseif ($_.name -eq "Standard Preset Security Policy") { "-1*" }elseif ($_.name -eq "Strict Preset Security Policy") { "-1" }else { ($RuleState | Where-Object name -EQ $_.name).Priority } } },
