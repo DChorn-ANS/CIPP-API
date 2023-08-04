@@ -16,6 +16,7 @@ try {
     New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-$($Function)Rule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
     try {
         New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-ATPProtectionPolicyRule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
+        New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-EOPProtectionPolicyRule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
     }
     catch {
         New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-EOPProtectionPolicyRule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
