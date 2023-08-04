@@ -21,9 +21,9 @@ try {
     catch {
         New-ExoRequest -tenantid $Tenantfilter -cmdlet "Get-EOPProtectionPolicyRule" | Select-Object * -ExcludeProperty *odata*, *data.type* | ForEach-Object { $RuleState.add($_) }
     }
-    $Policies = $Policies | Where-Object -FilterScript { $_.name -in $RuleState.Identity -or $_.IsDefault -eq $true -or $_.IsBuiltInProtection -eq $true }
     $Policies = $Policies | Select-Object -ExcludeProperty name -Property *,
     @{l = 'Name'; e = { $_.Identity } }
+    $Policies = $Policies | Where-Object -FilterScript { $_.name -like $RuleState.Identity -or $_.IsDefault -eq $true -or $_.IsBuiltInProtection -eq $true }
     $GraphRequest = $Policies | Select-Object *,
     @{l = 'ruleState'; e = { if ($_.isDefault -eq $true -or $_.isBuiltInProtection -eq $true) { "Default" }else { ($RuleState | Where-Object name -EQ $_.name).State } } },
     @{l = 'rulePrio'; e = { if ($_.isDefault -eq $true -or $_.isBuiltInProtection -eq $true) { "Lowest" }elseif ($_.name -eq "Standard Preset Security Policy") { "-1*" }elseif ($_.name -eq "Strict Preset Security Policy") { "-1" }else { ($RuleState | Where-Object name -EQ $_.name).Priority } } },
