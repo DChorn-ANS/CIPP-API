@@ -7,17 +7,24 @@ $Config = [pscustomobject](Get-AzDataTableEntity @Table -Filter $Filter)
 
 $Settings = [System.Collections.ArrayList]@('Alerts')
 $Config.psobject.properties.name | ForEach-Object { $settings.add($_) } 
-
+$severity = $Config.Severity -split ','
+Write-Host "Our Severity table is: $severity"
+if (!$severity) {
+  $severity = [System.Collections.ArrayList]@('Info', 'Error', 'Warning', 'Critical', 'Alert')
+}
+Write-Host "Our Severity table is: $severity"
 $Table = Get-CIPPTable
 $PartitionKey = Get-Date -UFormat '%Y%m%d'
 $Filter = "PartitionKey eq '{0}'" -f $PartitionKey
-$Currentlog = Get-AzDataTableEntity @Table -Filter $Filter | Where-Object { $_.API -In $Settings -and $_.SentAsAlert -ne $true }
-
+$Currentlog = Get-AzDataTableEntity @Table -Filter $Filter | Where-Object { 
+  $_.API -In $Settings -and $_.SentAsAlert -ne $true -and $_.Severity -In $severity
+}
+Write-Host ($Currentlog).count
 #email try
 try {
   if ($config.onePerTenant) {
     if ($Config.email -like '*@*' -and $null -ne $CurrentLog) {
-      $JSONRecipients = $Config.email.split(",").trim() | ForEach-Object { if ($_ -like '*@*') { '{"EmailAddress": {"Address": "' + $_ + '"}},' } }
+      $JSONRecipients = $Config.email.split(",").trim() | ForEach-Object { if ($_ -like '*@*') { '{ "EmailAddress": { "Address": "' + $_ + '" } }, ' } }
       $JSONRecipients = ([string]$JSONRecipients).Substring(0, ([string]$JSONRecipients).Length - 1)
       foreach ($tenant in ($CurrentLog.Tenant | Sort-Object -Unique)) {
         $HTMLLog = ($CurrentLog | Select-Object Message, API, Tenant, Username, Severity | Where-Object -Property tenant -EQ $tenant | ConvertTo-Html -frag) -replace '<table>', '<table class=blueTable>' | Out-String
@@ -47,7 +54,7 @@ try {
   }
   else {
     if ($Config.email -like '*@*' -and $null -ne $CurrentLog) {
-      $JSONRecipients = $Config.email.split(",").trim() | ForEach-Object { if ($_ -like '*@*') { '{"EmailAddress": {"Address": "' + $_ + '"}},' } }
+      $JSONRecipients = $Config.email.split(",").trim() | ForEach-Object { if ($_ -like '*@*') { '{ "EmailAddress": { "Address": "' + $_ + '" } }, ' } }
       $JSONRecipients = ([string]$JSONRecipients).Substring(0, ([string]$JSONRecipients).Length - 1)
       $HTMLLog = ($CurrentLog | Select-Object Message, API, Tenant, Username, Severity | ConvertTo-Html -frag) -replace '<table>', '<table class=blueTable>' | Out-String
       $JSONBody = @"
@@ -78,12 +85,12 @@ catch {
   Write-Host "Could not send alerts to email: $($_.Exception.message)"
   Write-LogMessage -API 'Alerts' -message "Could not send alerts to : $($_.Exception.message)" -sev info
 }
-#webhook try
+
+
 try {
   Write-Host $($config | ConvertTo-Json)
   Write-Host $config.webhook
-  if ($Config.webhook -ne '' -and $null -ne $CurrentLog -and $config.onePerTenant) {
-      foreach ($tenant in ($CurrentLog.Tenant | Sort-Object -Unique)) {
+  if ($Config.webhook -ne '' -and $null -ne $CurrentLog) {
     switch -wildcard ($config.webhook) {
 
       '*webhook.office.com*' {
@@ -112,39 +119,7 @@ try {
         Invoke-RestMethod -Uri $config.webhook -Method POST -ContentType 'Application/json' -Body $JSONBody
       }
     }
-      }
 
-  }else{
-        if ($Config.webhook -ne '' -and $null -ne $CurrentLog) {
-    switch -wildcard ($config.webhook) {
-
-      '*webhook.office.com*' {
-        $Log = $Currentlog | ConvertTo-Html -frag | Out-String
-        $JSonBody = "{`"text`": `"You've setup your alert policies to be alerted whenever specific events happen. We've found some of these events in the log. <br><br>$Log`"}" 
-        Invoke-RestMethod -Uri $config.webhook -Method POST -ContentType 'Application/json' -Body $JSONBody
-      }
-
-      '*slack.com*' {
-        $Log = $Currentlog | ForEach-Object {
-          $JSonBody = @"
-        {"blocks":[{"type":"header","text":{"type":"plain_text","text":"New Alert from CIPP","emoji":true}},{"type":"section","fields":[{"type":"mrkdwn","text":"*DateTime:*\n$($_.Timestamp)"},{"type":"mrkdwn","text":"*Tenant:*\n$($_.Tenant)"},{"type":"mrkdwn","text":"*API:*\n$($_.API)"},{"type":"mrkdwn","text":"*User:*\n$($_.Username)."}]},{"type":"section","text":{"type":"mrkdwn","text":"*Message:*\n$($_.Message)"}}]}
-"@
-          Invoke-RestMethod -Uri $config.webhook -Method POST -ContentType 'Application/json' -Body $JSONBody
-        }
-      }
-
-      '*discord.com*' {
-        $Log = $Currentlog | ConvertTo-Html -frag | Out-String
-        $JSonBody = "{`"content`": `"You've setup your alert policies to be alerted whenever specific events happen. We've found some of these events in the log. $Log`"}" 
-        Invoke-RestMethod -Uri $config.webhook -Method POST -ContentType 'Application/json' -Body $JSONBody
-      }
-      default {
-        $Log = $Currentlog | ConvertTo-Json -Compress
-        $JSonBody = $Log
-        Invoke-RestMethod -Uri $config.webhook -Method POST -ContentType 'Application/json' -Body $JSONBody
-      }
-    }
-        }
   }
 
   $UpdateLogs = $CurrentLog | ForEach-Object { 
@@ -159,7 +134,7 @@ catch {
   Write-Host "Could not send alerts to webhook: $($_.Exception.message)"
   Write-LogMessage -API 'Alerts' -message "Could not send alerts to : $($_.Exception.message)" -sev info
 }
-#Integration try
+
 if ($config.sendtoIntegration) {
   try {
     foreach ($tenant in ($CurrentLog.Tenant | Sort-Object -Unique)) {
