@@ -27,6 +27,10 @@ function Invoke-ExecServicePrincipals {
                     'b15665d9-eda6-4092-8539-0eec376afd59', # rclone
                     'a43e5392-f48b-46a4-a0f1-098b5eeb4757', # CloudSponge
                     'caffae8c-0882-4c81-9a27-d1803af53a40'  # SigParser
+					'2ef68ccc-8a4d-42ff-ae88-2d7bb89ad139'  # Mail_Backup
+					'858d7e42-35f0-44b7-9033-df309239a4f7', # ZoomInfo Login
+                    '497ac034-5120-4c1a-929a-0351f5c09918'  # ZoomInfo Communitiez Login
+					'77468577-4f6e-40e7-b745-11d3d0c28095'  # Fastmail
                 )
                 $Action = 'Create'
 
