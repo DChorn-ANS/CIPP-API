@@ -85,6 +85,60 @@
         }
       }
     },
+    "/AddWin32ScriptApp": {
+      "post": {
+        "description": "AddWin32ScriptApp",
+        "summary": "AddWin32ScriptApp",
+        "tags": ["POST"],
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "name": "ApplicationName",
+            "in": "body"
+          },
+          {
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "name": "installScript",
+            "in": "body"
+          },
+          {
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "name": "AssignTo",
+            "in": "body"
+          },
+          {
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "name": "InstallationIntent",
+            "in": "body"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {},
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful operation"
+          }
+        }
+      }
+    },
     "/RemoveUser": {
       "get": {
         "description": "RemoveUser",
@@ -3482,9 +3536,7 @@
       "get": {
         "description": "ListContactPermissions - Retrieves contact folder permissions for a specified user",
         "summary": "ListContactPermissions",
-        "tags": [
-          "GET"
-        ],
+        "tags": ["GET"],
         "parameters": [
           {
             "required": true,
@@ -3567,20 +3619,14 @@
       "post": {
         "description": "ExecModifyContactPerms - Modifies contact folder permissions for a specified user",
         "summary": "ExecModifyContactPerms",
-        "tags": [
-          "POST"
-        ],
+        "tags": ["POST"],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "userID",
-                  "tenantFilter",
-                  "permissions"
-                ],
+                "required": ["userID", "tenantFilter", "permissions"],
                 "properties": {
                   "userID": {
                     "type": "string",
@@ -3639,11 +3685,7 @@
                           "default": false
                         }
                       },
-                      "required": [
-                        "PermissionLevel",
-                        "Modification",
-                        "UserID"
-                      ]
+                      "required": ["PermissionLevel", "Modification", "UserID"]
                     }
                   }
                 }
@@ -8507,9 +8549,7 @@
       "get": {
         "description": "ListQuarantinePolicy",
         "summary": "ListQuarantinePolicy",
-        "tags": [
-          "GET"
-        ],
+        "tags": ["GET"],
         "parameters": [
           {
             "required": true,
@@ -8547,9 +8587,7 @@
       "post": {
         "description": "AddQuarantinePolicy",
         "summary": "AddQuarantinePolicy",
-        "tags": [
-          "POST"
-        ],
+        "tags": ["POST"],
         "parameters": [
           {
             "required": true,
@@ -8643,9 +8681,7 @@
       "post": {
         "description": "EditQuarantinePolicy",
         "summary": "EditQuarantinePolicy",
-        "tags": [
-          "POST"
-        ],
+        "tags": ["POST"],
         "parameters": [
           {
             "required": true,
@@ -8817,9 +8853,7 @@
       "get": {
         "description": "RemoveQuarantinePolicy",
         "summary": "RemoveQuarantinePolicy",
-        "tags": [
-          "GET"
-        ],
+        "tags": ["GET"],
         "parameters": [
           {
             "required": true,
@@ -8866,9 +8900,7 @@
     "get": {
       "description": "ExecDeleteSafeLinksPolicy",
       "summary": "ExecDeleteSafeLinksPolicy",
-      "tags": [
-        "GET"
-      ],
+      "tags": ["GET"],
       "parameters": [
         {
           "required": true,
@@ -8914,9 +8946,7 @@
     "post": {
       "description": "EditSafeLinksPolicy",
       "summary": "EditSafeLinksPolicy",
-      "tags": [
-        "POST"
-      ],
+      "tags": ["POST"],
       "parameters": [
         {
           "required": true,
@@ -9062,9 +9092,7 @@
     "get": {
       "description": "ListSafeLinksPolicyDetails",
       "summary": "ListSafeLinksPolicyDetails",
-      "tags": [
-        "GET"
-      ],
+      "tags": ["GET"],
       "parameters": [
         {
           "required": true,
@@ -9222,9 +9250,7 @@
     "post": {
       "description": "Create a new SafeLinks policy and associated rule",
       "summary": "Create SafeLinks Policy and Rule Configuration",
-      "tags": [
-        "POST"
-      ],
+      "tags": ["POST"],
       "parameters": [
         {
           "required": true,
@@ -9419,9 +9445,7 @@
     "get": {
       "description": "List SafeLinks Policy Templates",
       "summary": "List SafeLinks Policy Templates",
-      "tags": [
-        "GET"
-      ],
+      "tags": ["GET"],
       "responses": {
         "200": {
           "content": {
@@ -9444,9 +9468,7 @@
     "get": {
       "description": "Remove SafeLinks Policy Template",
       "summary": "Remove SafeLinks Policy Template",
-      "tags": [
-        "GET"
-      ],
+      "tags": ["GET"],
       "parameters": [
         {
           "required": true,
@@ -9476,9 +9498,7 @@
     "post": {
       "description": "Add SafeLinks Policy Template",
       "summary": "Add SafeLinks Policy Template",
-      "tags": [
-        "POST"
-      ],
+      "tags": ["POST"],
       "requestBody": {
         "content": {
           "application/json": {
@@ -9508,9 +9528,7 @@
     "post": {
       "description": "Deploy SafeLinks Policy From Template",
       "summary": "Deploy SafeLinks Policy From Template",
-      "tags": [
-        "POST"
-      ],
+      "tags": ["POST"],
       "requestBody": {
         "content": {
           "application/json": {
@@ -9540,9 +9558,7 @@
     "get": {
       "description": "List retention policies or get a specific retention policy by name",
       "summary": "Get Retention Policies",
-      "tags": [
-        "GET"
-      ],
+      "tags": ["GET"],
       "parameters": [
         {
           "required": true,
@@ -9624,9 +9640,7 @@
     "post": {
       "description": "Create, modify, or delete retention policies",
       "summary": "Manage Retention Policies",
-      "tags": [
-        "POST"
-      ],
+      "tags": ["POST"],
       "parameters": [
         {
           "required": true,
@@ -9762,9 +9776,7 @@
     "get": {
       "description": "List retention tags or get a specific retention tag by name",
       "summary": "Get Retention Tags",
-      "tags": [
-        "GET"
-      ],
+      "tags": ["GET"],
       "parameters": [
         {
           "required": true,
@@ -9852,9 +9864,7 @@
     "post": {
       "description": "Create, modify, or delete retention tags",
       "summary": "Manage Retention Tags",
-      "tags": [
-        "POST"
-      ],
+      "tags": ["POST"],
       "parameters": [
         {
           "required": true,
@@ -9882,12 +9892,39 @@
                       },
                       "Type": {
                         "type": "string",
-                        "enum": ["All", "Inbox", "SentItems", "DeletedItems", "Drafts", "Outbox", "JunkEmail", "Journal", "SyncIssues", "ConversationHistory", "Personal", "RecoverableItems", "NonIpmRoot", "LegacyArchiveJournals", "Clutter", "Calendar", "Notes", "Tasks", "Contacts", "RssSubscriptions", "ManagedCustomFolder"],
+                        "enum": [
+                          "All",
+                          "Inbox",
+                          "SentItems",
+                          "DeletedItems",
+                          "Drafts",
+                          "Outbox",
+                          "JunkEmail",
+                          "Journal",
+                          "SyncIssues",
+                          "ConversationHistory",
+                          "Personal",
+                          "RecoverableItems",
+                          "NonIpmRoot",
+                          "LegacyArchiveJournals",
+                          "Clutter",
+                          "Calendar",
+                          "Notes",
+                          "Tasks",
+                          "Contacts",
+                          "RssSubscriptions",
+                          "ManagedCustomFolder"
+                        ],
                         "description": "Type of the retention tag"
                       },
                       "RetentionAction": {
                         "type": "string",
-                        "enum": ["DeleteAndAllowRecovery", "PermanentlyDelete", "MoveToArchive", "MarkAsPastRetentionLimit"],
+                        "enum": [
+                          "DeleteAndAllowRecovery",
+                          "PermanentlyDelete",
+                          "MoveToArchive",
+                          "MarkAsPastRetentionLimit"
+                        ],
                         "description": "Action to take when retention period expires"
                       },
                       "AgeLimitForRetention": {
@@ -9932,7 +9969,12 @@
                       },
                       "RetentionAction": {
                         "type": "string",
-                        "enum": ["DeleteAndAllowRecovery", "PermanentlyDelete", "MoveToArchive", "MarkAsPastRetentionLimit"],
+                        "enum": [
+                          "DeleteAndAllowRecovery",
+                          "PermanentlyDelete",
+                          "MoveToArchive",
+                          "MarkAsPastRetentionLimit"
+                        ],
                         "description": "Action to take when retention period expires"
                       },
                       "AgeLimitForRetention": {
@@ -10021,9 +10063,7 @@
     "post": {
       "description": "Apply a retention policy to one or more mailboxes",
       "summary": "Set Mailbox Retention Policies",
-      "tags": [
-        "POST"
-      ],
+      "tags": ["POST"],
       "parameters": [
         {
           "required": true,
